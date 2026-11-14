@@ -6,9 +6,9 @@ Guía de estilos del frontend (`frontend/`).
 
 1. Fondo siempre blanco.
 2. Paleta principal: verde, amarillo y blanco.
-3. Todos los iconos son SVG inline (sin emojis, sin fuentes de iconos, sin imágenes raster).
-4. Experiencias 3D con CSS 3D transforms (`perspective`, `rotateX/Y`), sin dependencias externas.
-5. Respeta `prefers-reduced-motion`: las animaciones 3D se desactivan.
+3. Todos los iconos son SVG inline (sin emojis ni fuentes de iconos).
+4. Las ilustraciones son fotos reales de Santa Cruz y de sus problemas (incendios, quemas, inundaciones), en `frontend/img/` con sus créditos en `img/CREDITOS.md`. No hay escenas 3D.
+5. Respeta `prefers-reduced-motion`.
 
 ## Colores
 
@@ -17,7 +17,7 @@ Guía de estilos del frontend (`frontend/`).
 | `--white` | `#FFFFFF` | Fondo de página y tarjetas |
 | `--green-900` | `#14532D` | Texto de títulos |
 | `--green-700` | `#2E7D32` | Color principal, botones, iconos |
-| `--green-500` | `#5CB85C` | Acentos, caras 3D |
+| `--green-500` | `#5CB85C` | Acentos |
 | `--green-100` | `#E8F5E9` | Superficies suaves |
 | `--yellow-500` | `#F5C518` | Acento secundario, llamadas a la acción |
 | `--yellow-100` | `#FFF8DC` | Superficies suaves cálidas |
@@ -43,18 +43,19 @@ Contraste: texto verde oscuro o `--ink` sobre blanco; texto `--green-900` sobre 
 2. Color por `currentColor` (verde o amarillo según contexto).
 3. Con `aria-hidden="true"` cuando son decorativos.
 
-## 3D
+## Imágenes
 
-1. Escena hero: parcela (chacra) en bloque isométrico con cubo de cultivo que gira y reacciona al mouse (parallax).
-2. Tarjetas: inclinación 3D al pasar el cursor (`rotateX/rotateY` hasta 10°) con capa interior elevada (`translateZ`).
-3. Perspectiva: `perspective: 1200px`.
+1. Fotos reales con licencia libre, de 1200 px de ancho, con `alt` descriptivo y `width`/`height` definidos.
+2. Hero: foto de Santa Cruz con `object-fit: cover` y radio 24px.
+3. Sección de problemas: tarjetas `.photo` dentro de `.photo-grid`, con título y una frase corta.
+4. Cada foto nueva se acredita en `frontend/img/CREDITOS.md`.
 
 ## Estructura de carpetas
 
 1. `frontend/index.html`, `mi-chacra.html`, `resultado.html`, `terrenos.html`: versión web (mockups W1 a W4).
 2. `frontend/movil/`: flujo móvil en 6 pantallas (Inicio, Ubicación, Cultivo, Prioridades, Resultado, Detalle).
 3. `frontend/app.css` y `frontend/app.js`: estilos e interacción de las pantallas.
-4. `frontend/hero-3d.html`, `styles.css`, `main.js`, `mockups.*`: exploración del hero 3D (en pausa).
+4. `frontend/img/`: fotos reales y `CREDITOS.md`.
 5. `frontend/logo.txt`: isotipo SVG original (copia inline en `index.html`).
 6. `backend/`: sin interfaz; no aplica estilos.
 
@@ -67,10 +68,9 @@ Contraste: texto verde oscuro o `--ink` sobre blanco; texto `--green-900` sobre 
 ## Componentes
 
 1. `.btn-yellow` (acción principal), `.btn-green` y `.btn-outline` (secundarias), todos con radio 999px.
-2. `.tilt-card` con `data-tilt`: tarjeta con inclinación 3D y `.tilt-inner` elevado.
+2. `.photo` y `.photo-grid`: fotos reales con pie de foto.
 3. `.card-icon.icon-green` / `.icon-yellow`: contenedor del icono SVG.
-4. `.iso-scene`: parcela `.plot-base` con surcos, `.crop-cube` giratorio y `.sensor-pin` flotantes.
-5. Secciones alternan fondo blanco, `--green-100` y `--yellow-100`.
+4. Secciones alternan fondo blanco, `--green-100` y `--yellow-100`.
 
 ## Pantallas de los mockups
 
