@@ -1,0 +1,43 @@
+/* Demo con datos reales: complementa app.css (ver design.md). */
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; align-items: end; }
+.field { display: grid; gap: 4px; font-weight: 700; color: var(--green-900); }
+.field input { min-height: 48px; padding: 0 16px; border: 2px solid var(--green-500); border-radius: var(--radius); font: inherit; color: var(--ink); background: var(--white); width: 100%; }
+.fields .btn { min-height: 48px; }
+.btn[disabled] { opacity: .6; cursor: progress; transform: none; box-shadow: none; }
+.is-hidden { display: none; }
+.err { background: var(--white); border-style: dashed; border-color: var(--green-900); }
+
+/* Celdas de la tabla: el estado va también escrito en las dos últimas filas */
+.gt td { border-radius: 8px; padding: 8px 2px; font-weight: 700; color: var(--green-900); }
+.gt .c-ok { background: var(--green-100); border: 2px solid var(--green-700); }
+.gt .c-warn { background: var(--yellow-100); border: 2px solid var(--yellow-500); }
+.gt .c-bad { background: var(--white); border: 2px dashed var(--green-900); }
+.gt .c-nodata { background: var(--white); border: 2px dotted var(--green-500); font-weight: 400; }
+.gt .c-plain { background: var(--white); border: 2px solid var(--green-100); font-weight: 600; }
+.gt tbody th { white-space: nowrap; }
+.data { margin-top: 48px; display: grid; gap: 16px; }
+.sw-nodata { background: var(--white); border-style: dotted; }
+.facts { display: grid; gap: 8px; }
+.facts li { position: relative; padding-left: 20px; }
+.facts li::before { content: ""; position: absolute; left: 0; top: .65em; width: 8px; height: 8px; border-radius: 50%; background: var(--yellow-500); }
+
+/* Mapa real (Leaflet) */
+.map#mapa { height: 320px; z-index: 0; isolation: isolate; background: var(--green-100); }
+.pin { color: var(--green-900); filter: drop-shadow(0 3px 4px rgba(20, 83, 45, .35)); }
+.pin svg { display: block; fill: var(--yellow-500); }
+.loc small { font-weight: 400; }
+.loc[disabled] { opacity: .6; cursor: progress; }
+
+/* Resultado con datos reales */
+.opt .btn { justify-self: start; margin-top: 4px; }
+.opt.is-viewing { outline: 3px solid var(--yellow-500); outline-offset: 2px; }
+.opt p { min-height: 0; }
+.plan { width: 100%; border-collapse: collapse; background: var(--white); border-radius: var(--radius); overflow: hidden; font-size: .95rem; }
+.plan th, .plan td { padding: 10px 12px; text-align: left; border-bottom: 2px solid var(--green-100); }
+.plan thead th { color: var(--green-900); font-weight: 800; background: var(--yellow-100); }
+.plan tbody th { color: var(--green-900); }
+.plan tr:last-child td, .plan tr:last-child th { border-bottom: 0; }
+.plan-wrap { overflow-x: auto; border-radius: var(--radius); border: 2px solid var(--green-100); }
+.year-full { grid-column: 1 / -1; display: grid; gap: 12px; }
+.empty { padding: 48px 0; display: grid; gap: 16px; justify-items: start; }
+.loading { display: flex; align-items: center; gap: 12px; }
