@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chacra Futura — Monitoreo Agrícola y Climático</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="#" class="brand" aria-label="Chacra Futura Inicio">
+        <!-- Isotipo SVG Inline -->
+        <svg viewBox="0 0 240 240" width="40" height="40" aria-hidden="true">
+          <defs>
+            <clipPath id="chacra-clip">
+              <circle cx="120" cy="120" r="95" />
+            </clipPath>
+          </defs>
+          <g clip-path="url(#chacra-clip)">
+            <polygon points="15,135 52,62 78,85 102,74 145,135" fill="#5CB85C" />
+            <polygon points="15,135 52,62 64,135" fill="#2E7D32" />
+            <path d="M 15,122 Q 70,126 122,155 L 110,168 Q 65,142 15,138 Z" fill="#5CB85C" />
+            <path d="M 15,145 Q 62,150 102,175 L 90,188 Q 55,165 15,160 Z" fill="#2E7D32" />
+            <path d="M 15,168 Q 52,172 82,194 L 68,208 Q 44,188 15,184 Z" fill="#14532D" />
+            <path d="M 48,205 Q 105,135 225,128 L 225,142 Q 112,150 60,216 Z" fill="#C86D3B" />
+            <path d="M 66,222 Q 120,156 225,148 L 225,166 Q 130,175 84,232 Z" fill="#B35627" />
+            <path d="M 92,234 Q 142,180 225,172 L 225,194 Q 155,202 116,240 Z" fill="#9E471C" />
+            <path d="M 126,240 Q 168,206 225,200 L 225,235 L 126,240 Z" fill="#B35627" />
+          </g>
+          <g stroke-linecap="round">
+            <path d="M 115,48 Q 140,50 158,58" fill="none" stroke="#2E7D32" stroke-width="6" />
+            <circle cx="115" cy="48" r="8.5" fill="#2E7D32" />
+            <circle cx="172" cy="66" r="8.5" fill="#F5C518" />
+            <path d="M 184,77 L 191,85" fill="none" stroke="#F5C518" stroke-width="6" />
+            <circle cx="200" cy="98" r="8.5" fill="#2E7D32" />
+            <path d="M 204,110 L 207,118" fill="none" stroke="#F5C518" stroke-width="6" />
+            <circle cx="132" cy="78" r="8.5" fill="#F5C518" />
+            <path d="M 146,85 L 154,90" fill="none" stroke="#2E7D32" stroke-width="6" />
+            <circle cx="163" cy="96" r="8.5" fill="#2E7D32" />
+            <path d="M 169,105 Q 174,113 177,121" fill="none" stroke="#2E7D32" stroke-width="6" />
+          </g>
+        </svg>
+        <span class="brand-name">CHACRA</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Navegación principal">
+        <a href="#monitoreo">Monitoreo</a>
+        <a href="#clima">Datos NASA</a>
+        <a href="#parcelas" class="btn btn-yellow">Explorar Parcelas</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero con escena 3D isométrica -->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <span class="badge">Teledetección &amp; Agroecología Boliviana</span>
+          <h1>Control inteligente de tus sembradíos</h1>
+          <p>
+            Monitorea el estado real de tus chacras en los valles, altiplano y llanos de Bolivia cruzando cambios de uso de suelo con datos climáticos satelitales de la NASA.
+          </p>
+          <div class="hero-actions">
+            <a href="#monitoreo" class="btn btn-green">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" />
+              </svg>
+              Analizar Parcela
+            </a>
+            <a href="#clima" class="btn btn-outline">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M3.6 9h16.8M3.6 15h16.8M11.5 3a17 17 0 0 0 0 18M12.5 3a17 17 0 0 1 0 18" />
+              </svg>
+              Variables Satelitales
+            </a>
+          </div>
+        </div>
+
+        <!-- Escena 3D CSS Pura -->
+        <div class="hero-stage" id="hero-stage" aria-hidden="true">
+          <div class="iso-scene" id="iso-scene">
+            <!-- Base de parcela (chacra) isométrica -->
+            <div class="plot-base">
+              <div class="furrow f1"></div>
+              <div class="furrow f2"></div>
+              <div class="furrow f3"></div>
+              <div class="furrow f4"></div>
+            </div>
+
+            <!-- Cubo de cultivo giratorio -->
+            <div class="crop-cube">
+              <div class="face front">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 20V10" />
+                  <path d="M12 14c-4 0-6-3-6-6 3 0 6 2 6 6Z" />
+                  <path d="M12 11c4 0 6-3 6-6-3 0-6 2-6 6Z" />
+                </svg>
+              </div>
+              <div class="face back">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 3v18M5 10l7-7 7 7" />
+                </svg>
+              </div>
+              <div class="face right">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+                </svg>
+              </div>
+              <div class="face left">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41" />
+                </svg>
+              </div>
+              <div class="face top"></div>
+              <div class="face bottom"></div>
+            </div>
+
+            <!-- Nodos flotantes 3D -->
+            <div class="sensor-pin pin-1">NDVI 0.78</div>
+            <div class="sensor-pin pin-2">Humedad 64%</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tarjetas con inclinación 3D -->
+    <section class="features" id="monitoreo">
+      <div class="container">
+        <div class="section-head">
+          <h2>Diagnóstico integral de campo</h2>
+          <p>Indicadores precisos para anticipar heladas, sequías y variaciones de rendimiento.</p>
+        </div>
+
+        <div class="cards-grid">
+          <article class="tilt-card" data-tilt>
+            <div class="tilt-inner">
+              <div class="card-icon icon-green">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 20V10" />
+                  <path d="M12 14c-4.5 0-7-3-7-7 4 0 7 2.5 7 7Z" />
+                  <path d="M12 11c4.5 0 7-3 7-7-4 0-7 2.5-7 7Z" />
+                </svg>
+              </div>
+              <h3>Vigor Vegetativo (NDVI)</h3>
+              <p>Seguimiento multiespectral del crecimiento de papa, maíz, quinua y hortalizas por cada parcela registrada.</p>
+            </div>
+          </article>
+
+          <article class="tilt-card" data-tilt>
+            <div class="tilt-inner">
+              <div class="card-icon icon-yellow">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41" />
+                </svg>
+              </div>
+              <h3>Clima Satelital NASA</h3>
+              <p>Integración directa con NASA POWER y GPM para alertas tempranas de radiación solar, déficit hídrico y heladas.</p>
+            </div>
+          </article>
+
+          <article class="tilt-card" data-tilt>
+            <div class="tilt-inner">
+              <div class="card-icon icon-green">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
+                  <line x1="9" y1="3" x2="9" y2="18" />
+                  <line x1="15" y1="6" x2="15" y2="21" />
+                </svg>
+              </div>
+              <h3>Cambio de Uso de Campo</h3>
+              <p>Detección histórica de rotación de cultivos, descanso de suelos y expansión agrícola en pisos ecológicos.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="main.js"></script>
+</body>
+</html>
+
+
+css
+:root {
+  --white: #FFFFFF;
+  --green-900: #14532D;
+  --green-700: #2E7D32;
+  --green-500: #5CB85C;
+  --green-100: #E8F5E9;
+  --yellow-500: #F5C518;
+  --yellow-100: #FFF8DC;
+  --ink: #1F2937;
+  --soil-brown: #B35627;
+
+  --shadow-green: 0 20px 40px rgba(46, 125, 50, 0.15);
+  --radius-card: 16px;
+  --radius-pill: 999px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--white);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+.container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Header */
+.site-header {
+  background: var(--white);
+  border-bottom: 1px solid var(--green-100);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 76px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.brand-name {
+  color: var(--green-900);
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: 0.08em;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.nav-links a:not(.btn) {
+  color: var(--green-900);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.nav-links a:not(.btn):hover {
+  color: var(--green-700);
+}
+
+/* Botones */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn-green {
+  background-color: var(--green-700);
+  color: var(--white);
+  box-shadow: var(--shadow-green);
+}
+
+.btn-yellow {
+  background-color: var(--yellow-500);
+  color: var(--green-900);
+}
+
+.btn-outline {
+  background-color: var(--white);
+  color: var(--green-900);
+  border: 2px solid var(--green-100);
+}
+
+/* Hero */
+.hero {
+  padding: 64px 0 96px;
+  background-color: var(--white);
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  align-items: center;
+  gap: 48px;
+}
+
+.badge {
+  display: inline-block;
+  background-color: var(--yellow-100);
+  color: var(--green-900);
+  font-weight: 700;
+  font-size: 0.875rem;
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 16px;
+}
+
+h1 {
+  color: var(--green-900);
+  font-weight: 800;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  line-height: 1.1;
+  margin-bottom: 24px;
+}
+
+.hero-copy p {
+  max-width: 54ch;
+  margin-bottom: 32px;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* Escena 3D Isométrica */
+.hero-stage {
+  perspective: 1200px;
+  height: 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iso-scene {
+  position: relative;
+  width: 260px;
+  height: 260px;
+  transform-style: preserve-3d;
+  transform: rotateX(55deg) rotateZ(-45deg);
+  transition: transform 0.15s ease-out;
+}
+
+.plot-base {
+  position: absolute;
+  inset: 0;
+  background: var(--green-100);
+  border-radius: 24px;
+  border: 4px solid var(--green-500);
+  box-shadow: -14px 14px 0 var(--green-700), -28px 28px 40px rgba(46, 125, 50, 0.22);
+  display: grid;
+  grid-template-rows: repeat(4, 1fr);
+  gap: 10px;
+  padding: 20px;
+}
+
+.furrow {
+  border-radius: 8px;
+}
+
+.f1, .f2 {
+  background: var(--green-500);
+}
+
+.f3, .f4 {
+  background: var(--soil-brown);
+}
+
+/* Cubo 3D de cultivo */
+.crop-cube {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 72px;
+  height: 72px;
+  margin: -36px 0 0 -36px;
+  transform-style: preserve-3d;
+  transform: translateZ(72px);
+  animation: spinCube 12s linear infinite;
+}
+
+.face {
+  position: absolute;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 2px solid var(--white);
+  color: var(--white);
+}
+
+.front  { background: var(--green-700); transform: rotateY(0deg) translateZ(36px); }
+.back   { background: var(--green-900); transform: rotateY(180deg) translateZ(36px); }
+.right  { background: var(--green-500); transform: rotateY(90deg) translateZ(36px); }
+.left   { background: var(--yellow-500); color: var(--green-900); transform: rotateY(-90deg) translateZ(36px); }
+.top    { background: var(--green-100); transform: rotateX(90deg) translateZ(36px); }
+.bottom { background: var(--green-900); transform: rotateX(-90deg) translateZ(36px); }
+
+@keyframes spinCube {
+  from { transform: translateZ(72px) rotateX(0deg) rotateY(0deg); }
+  to   { transform: translateZ(72px) rotateX(360deg) rotateY(360deg); }
+}
+
+/* Etiquetas flotantes en la escena */
+.sensor-pin {
+  position: absolute;
+  background: var(--white);
+  color: var(--green-900);
+  font-weight: 800;
+  font-size: 0.8rem;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-green);
+  border: 2px solid var(--yellow-500);
+  transform: rotateZ(45deg) rotateX(-55deg) translateZ(95px);
+  white-space: nowrap;
+}
+
+.pin-1 { top: -12px; right: -24px; }
+.pin-2 { bottom: 8px; left: -24px; border-color: var(--green-500); }
+
+/* Sección de Tarjetas 3D */
+.features {
+  padding: 64px 0 96px;
+}
+
+.section-head {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.section-head h2 {
+  color: var(--green-900);
+  font-weight: 800;
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  margin-bottom: 8px;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  perspective: 1200px;
+}
+
+.tilt-card {
+  background: var(--white);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--green-100);
+  box-shadow: var(--shadow-green);
+  padding: 32px 24px;
+  transform-style: preserve-3d;
+  transition: transform 0.18s ease-out;
+}
+
+.tilt-inner {
+  transform: translateZ(28px);
+}
+
+.card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.icon-green {
+  background: var(--green-100);
+  color: var(--green-700);
+}
+
+.icon-yellow {
+  background: var(--yellow-100);
+  color: var(--green-900);
+}
+
+.tilt-card h3 {
+  color: var(--green-900);
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+/* Accesibilidad: desactivar movimiento 3D */
+@media (prefers-reduced-motion: reduce) {
+  .crop-cube {
+    animation: none;
+  }
+  .iso-scene,
+  .tilt-card {
+    transition: none;
+    transform: none !important;
+  }
+  .iso-scene {
+    transform: rotateX(55deg) rotateZ(-45deg) !important;
+  }
+}
+
+@media (max-width: 860px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .hero-copy p {
+    margin-inline: auto;
+  }
+  .hero-actions {
+    justify-content: center;
+  }
+}
+
+js
+(() => {
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReducedMotion) return;
+
+  // 1. Parallax 3D en la escena isométrica del Hero
+  const heroStage = document.getElementById('hero-stage');
+  const isoScene = document.getElementById('iso-scene');
+
+  if (heroStage && isoScene) {
+    heroStage.addEventListener('mousemove', (e) => {
+      const rect = heroStage.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+
+      const rotX = 55 - y * 14;
+      const rotZ = -45 + x * 18;
+      isoScene.style.transform = `rotateX(${rotX.toFixed(2)}deg) rotateZ(${rotZ.toFixed(2)}deg)`;
+    });
+
+    heroStage.addEventListener('mouseleave', () => {
+      isoScene.style.transform = 'rotateX(55deg) rotateZ(-45deg)';
+    });
+  }
+
+  // 2. Inclinación 3D (hasta 10°) en tarjetas con capa interior elevada
+  const cards = document.querySelectorAll('[data-tilt]');
+  const MAX_TILT = 10;
+
+  cards.forEach((card) => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+
+      const rotateX = (-y * 2 * MAX_TILT).toFixed(2);
+      const rotateY = (x * 2 * MAX_TILT).toFixed(2);
+
+      card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = 'rotateX(0deg) rotateY(0deg)';
+    });
+  });
+})();
