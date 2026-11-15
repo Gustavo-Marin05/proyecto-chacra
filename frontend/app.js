@@ -1,4 +1,4 @@
-// Interacción de las pantallas de Chacra Futura (sin dependencias)
+// Interacción de las pantallas de Chacra (sin dependencias)
 const CHECK = '<svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 const CHECK_BIG = CHECK.replace(/16/g, "20");
 const ARROW = '<svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
@@ -67,7 +67,7 @@ document.querySelectorAll("[data-speak]").forEach((btn) => {
 
 // WhatsApp: comparte la opción recomendada
 document.querySelectorAll("[data-whatsapp]").forEach((a) => {
-  const text = "Chacra Futura: mi mejor opción es Maíz → Haba → Trigo. Cuida la tierra y pide poca agua. (Ejemplo con datos ilustrativos)";
+  const text = "Chacra: mi mejor opción es Maíz → Haba → Trigo. Cuida la tierra y pide poca agua. (Ejemplo con datos ilustrativos)";
   a.href = "https://wa.me/?text=" + encodeURIComponent(text);
   a.target = "_blank";
   a.rel = "noopener";

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tierra 3D · Chacra</title>
+<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="tierra.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="index.html" class="brand" aria-label="Chacra, inicio"><svg viewBox="0 0 240 240" width="40" height="40" aria-hidden="true">
+          <defs>
+            <clipPath id="chacra-clip-4">
+              <circle cx="120" cy="120" r="95" />
+            </clipPath>
+          </defs>
+          <g clip-path="url(#chacra-clip-4)">
+            <polygon points="15,135 52,62 78,85 102,74 145,135" fill="#5CB85C" />
+            <polygon points="15,135 52,62 64,135" fill="#2E7D32" />
+            <path d="M 15,122 Q 70,126 122,155 L 110,168 Q 65,142 15,138 Z" fill="#5CB85C" />
+            <path d="M 15,145 Q 62,150 102,175 L 90,188 Q 55,165 15,160 Z" fill="#2E7D32" />
+            <path d="M 15,168 Q 52,172 82,194 L 68,208 Q 44,188 15,184 Z" fill="#14532D" />
+            <path d="M 48,205 Q 105,135 225,128 L 225,142 Q 112,150 60,216 Z" fill="#C86D3B" />
+            <path d="M 66,222 Q 120,156 225,148 L 225,166 Q 130,175 84,232 Z" fill="#B35627" />
+            <path d="M 92,234 Q 142,180 225,172 L 225,194 Q 155,202 116,240 Z" fill="#9E471C" />
+            <path d="M 126,240 Q 168,206 225,200 L 225,235 L 126,240 Z" fill="#B35627" />
+          </g>
+          <g stroke-linecap="round">
+            <path d="M 115,48 Q 140,50 158,58" fill="none" stroke="#2E7D32" stroke-width="6" />
+            <circle cx="115" cy="48" r="8.5" fill="#2E7D32" />
+            <circle cx="172" cy="66" r="8.5" fill="#F5C518" />
+            <path d="M 184,77 L 191,85" fill="none" stroke="#F5C518" stroke-width="6" />
+            <circle cx="200" cy="98" r="8.5" fill="#2E7D32" />
+            <path d="M 204,110 L 207,118" fill="none" stroke="#F5C518" stroke-width="6" />
+            <circle cx="132" cy="78" r="8.5" fill="#F5C518" />
+            <path d="M 146,85 L 154,90" fill="none" stroke="#2E7D32" stroke-width="6" />
+            <circle cx="163" cy="96" r="8.5" fill="#2E7D32" />
+            <path d="M 169,105 Q 174,113 177,121" fill="none" stroke="#2E7D32" stroke-width="6" />
+          </g>
+        </svg></a>
+    <nav class="main-nav" aria-label="Navegación principal"><a href="index.html" class="nav-link">Inicio</a><a href="mi-chacra.html" class="nav-link">Mi chacra</a><a href="resultado.html" class="nav-link">Resultado</a><a href="terrenos.html" class="nav-link">Mis terrenos</a><a href="tierra.html" class="nav-link is-active" aria-current="page">Tierra 3D</a></nav>
+    <div class="header-tools">
+      <button type="button" class="pill"><svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>Español</button>
+      <button type="button" class="round-btn" data-speak aria-label="Escuchar esta pantalla"><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg></button>
+    </div>
+  </div>
+</header>
+<main id="main">
+<section class="container tierra-wrap">
+<div class="tierra-globo">
+<div class="g-lienzo" id="globo" role="img" aria-label="Globo terráqueo en 3D con imágenes de la NASA"></div>
+<p class="tierra-cargando" id="globo-estado">Cargando la Tierra…</p>
+<div class="g-capas" role="group" aria-label="Capa de la NASA">
+<button type="button" class="g-op" data-capa="detalle" aria-pressed="false">Satélite</button>
+<button type="button" class="g-op" data-capa="verde" aria-pressed="false">Vegetación</button>
+<button type="button" class="g-op" data-capa="temp" aria-pressed="false">Temperatura</button>
+<button type="button" class="g-op" data-capa="lluvia" aria-pressed="false">Lluvia</button>
+<button type="button" class="g-op" data-capa="fuego" aria-pressed="false">Incendios</button>
+<button type="button" class="g-op" data-capa="tierra" aria-pressed="false">Mapa</button>
+<button type="button" class="g-op" data-capa="noche" aria-pressed="false">Noche</button>
+</div>
+<div class="g-zoom">
+<button type="button" id="z-mas" aria-label="Acercar">+</button>
+<button type="button" id="z-menos" aria-label="Alejar">−</button>
+</div>
+<div class="g-vistas">
+<button type="button" class="g-op" id="btn-scz">Santa Cruz</button>
+<button type="button" class="g-op" id="btn-bolivia">Bolivia</button>
+<button type="button" class="g-op" id="btn-giro" aria-pressed="false">Girar</button>
+</div>
+<p class="g-nota" id="capa-nota"></p>
+</div>
+<aside class="tierra-side">
+<div class="panel" id="clima-panel" aria-live="polite">
+<h2 id="cl-titulo">Toca un lugar</h2>
+<p class="hint" id="cl-sub">Verás su lluvia y temperatura por mes.</p>
+<dl class="cl-datos is-hidden" id="cl-datos"><div><dt>Lluvia al año</dt><dd id="cl-lluvia"></dd></div><div><dt>Altura</dt><dd id="cl-alt"></dd></div></dl>
+<div class="cl-meses is-hidden" id="cl-meses"></div>
+<p class="small is-hidden" id="cl-fuente"></p>
+</div>
+<div class="panel" id="ciudades-panel">
+<div class="chips tierra-vista" role="group" aria-label="Qué lugares mostrar"><button type="button" class="chip is-selected" data-vista="scz" aria-pressed="true">Santa Cruz</button><button type="button" class="chip" data-vista="bolivia" aria-pressed="false">Bolivia</button></div>
+<h2 id="lista-titulo">Pueblos de Santa Cruz</h2>
+<ul class="ciudades-leyenda"><li><span class="ciudad-dot" style="background:#e65100"></span>&lt;600 mm</li><li><span class="ciudad-dot" style="background:#f5c518"></span>600–1000</li><li><span class="ciudad-dot" style="background:#43a047"></span>1000–1500</li><li><span class="ciudad-dot" style="background:#1565c0"></span>&gt;1500</li></ul>
+<ul class="ciudades-lista" id="ciudades-lista" aria-live="polite"><li class="small hint">Cargando datos…</li></ul></div>
+</aside>
+</section>
+</main>
+<footer class="site-footer"><div class="container foot-inner"><span>Astrobugs</span><a href="movil/index.html" class="foot-link">Ver versión móvil</a></div></footer>
+<script src="vendor/globe/globe.gl.min.js"></script>
+<script src="app.js"></script>
+<script src="tierra.js"></script>
+</body>
+</html>

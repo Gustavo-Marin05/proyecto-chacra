@@ -1,4 +1,4 @@
-# Design — Chacra Futura
+# Design — Chacra
 
 Guía de estilos del frontend (`frontend/`).
 
@@ -74,7 +74,7 @@ Contraste: texto verde oscuro o `--ink` sobre blanco; texto `--green-900` sobre 
 
 ## Pantallas de los mockups
 
-1. Fuente: mockups "Chacra Futura – Mockups" (6 pantallas móviles y 4 web). Se replican con esta guía: fondo blanco, verde y amarillo; no se usa el beige ni los verdes del mockup original.
+1. Fuente: mockups "Chacra – Mockups" (6 pantallas móviles y 4 web). Se replican con esta guía: fondo blanco, verde y amarillo; no se usa el beige ni los verdes del mockup original.
 2. Estados `Bien` (verde, check), `Ojo` (amarillo, alerta) y `Evitar` / `Mal` (borde punteado o rayado, equis). Nunca solo por color.
 3. Rueda del año: dos anillos de 12 meses (afuera suelo cubierto, adentro agua y calor); `Evitar` usa rayado diagonal.
 4. Calendario "Mi año completo": Siembra amarillo, Crece verde claro, Cosecha verde oscuro, Suelo libre borde punteado.

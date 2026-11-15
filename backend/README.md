@@ -1,6 +1,6 @@
 # Backend
 
-Este es el backend de Chacra Futura. Está hecho en Python con Flask.
+Este es el backend de Chacra. Está hecho en Python con Flask.
 
 Por ahora es una demo: consulta datos reales de la NASA para un punto y los resume mes a mes.
 
@@ -35,7 +35,8 @@ Ninguna de las dos fuentes pide cuenta ni clave. A la NASA solo se le envían la
 1. `app.py`: rutas de Flask.
 2. `nasa.py`: consultas a las dos APIs, caché y reglas de clasificación (Bien, Ojo, Evitar).
 3. `precargar.py`: llena la caché de un punto.
-4. `cache/`: respuestas guardadas; no se sube al repositorio.
+4. `teselas.py`: teselas del globo de Tierra 3D (`/api/tesela/<capa>/<z>/<x>/<y>.jpg?fecha=AAAA-MM-DD`). Mezcla una capa de NASA GIBS (vegetación, temperatura, lluvia o incendios) sobre el mapa de relieve. Usa Pillow.
+5. `cache/`: respuestas y teselas guardadas; no se sube al repositorio.
 
 ## Límites conocidos
 

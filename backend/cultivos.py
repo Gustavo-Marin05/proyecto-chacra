@@ -1,4 +1,4 @@
-"""Ficha de cultivos de Chacra Futura.
+"""Ficha de cultivos de Chacra.
 
 POR VALIDAR: valores generales, no ajustados a una zona. Un técnico local debe revisarlos.
 

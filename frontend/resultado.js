@@ -193,7 +193,7 @@ function dibujar() {
   dibujarLluvia();
   dibujarTabla();
   const rec = datos.opciones[0];
-  const mensaje = `Chacra Futura: para ${entrada.lugar || "mi chacra"}, la opción recomendada es ${rec.titulo}. ${rec.resumen} Es un apoyo; hay que revisarlo con un técnico.`;
+  const mensaje = `Chacra: para ${entrada.lugar || "mi chacra"}, la opción recomendada es ${rec.titulo}. ${rec.resumen} Es un apoyo; hay que revisarlo con un técnico.`;
   $("whatsapp").href = "https://wa.me/?text=" + encodeURIComponent(mensaje);
 }
 

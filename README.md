@@ -1,6 +1,6 @@
-# Chacra Futura
+# Chacra
 
-Proyecto con frontend y backend para Chacra Futura.
+Proyecto con frontend y backend para Chacra.
 
 ## Estructura
 

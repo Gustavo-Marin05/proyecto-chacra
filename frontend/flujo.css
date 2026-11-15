@@ -10,7 +10,7 @@
 /* Celdas de la tabla: el estado va también escrito en las dos últimas filas */
 .gt td { border-radius: 8px; padding: 8px 2px; font-weight: 700; color: var(--green-900); }
 .gt .c-ok { background: var(--green-100); border: 2px solid var(--green-700); }
-.gt .c-warn { background: var(--yellow-100); border: 2px solid var(--yellow-500); }
+.gt .c-warn { background: var(--yellow-100); border: 2px solid var(--green-700); }
 .gt .c-bad { background: var(--white); border: 2px dashed var(--green-900); }
 .gt .c-nodata { background: var(--white); border: 2px dotted var(--green-500); font-weight: 400; }
 .gt .c-plain { background: var(--white); border: 2px solid var(--green-100); font-weight: 600; }
@@ -30,7 +30,7 @@
 
 /* Resultado con datos reales */
 .opt .btn { justify-self: start; margin-top: 4px; }
-.opt.is-viewing { outline: 3px solid var(--yellow-500); outline-offset: 2px; }
+.opt.is-viewing { outline: 3px solid var(--green-900); outline-offset: 2px; }
 .opt p { min-height: 0; }
 .plan { width: 100%; border-collapse: collapse; background: var(--white); border-radius: var(--radius); overflow: hidden; font-size: .95rem; }
 .plan th, .plan td { padding: 10px 12px; text-align: left; border-bottom: 2px solid var(--green-100); }

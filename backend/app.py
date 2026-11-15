@@ -1,15 +1,16 @@
-"""Backend de Chacra Futura (demo): API con datos reales de NASA POWER y MODIS.
+"""Backend de Chacra (demo): API con datos reales de NASA POWER y MODIS.
 
 Uso:  python app.py   y abrir http://localhost:5000/mi-chacra.html
 También sirve los archivos de ../frontend para que la demo funcione sin configurar nada más.
 """
 from pathlib import Path
 
-from flask import Flask, jsonify, request
+from flask import Flask, Response, jsonify, request
 
 import lugares
 import nasa
 import rotaciones
+import teselas
 from cultivos import CULTIVOS
 
 FRONTEND = Path(__file__).resolve().parent.parent / "frontend"
@@ -94,6 +95,18 @@ def api_opciones():
     }
     clima = nasa.clima(lat, lon)
     return jsonify(lat=lat, lon=lon, entrada=entrada, clima=clima, **rotaciones.comparar(clima, entrada))
+
+
+@app.errorhandler(teselas.TeselaInvalida)
+def tesela_invalida(error):
+    return jsonify(error=str(error)), 400
+
+
+@app.get("/api/tesela/<capa>/<int:z>/<int:x>/<int:y>.jpg")
+def api_tesela(capa, z, x, y):
+    """Tesela del globo 3D: capa de la NASA sobre el mapa base (ver teselas.py)."""
+    datos = teselas.tesela(capa, z, x, y, request.args.get("fecha", ""))
+    return Response(datos, mimetype="image/jpeg", headers={"Cache-Control": "public, max-age=86400"})
 
 
 if __name__ == "__main__":
