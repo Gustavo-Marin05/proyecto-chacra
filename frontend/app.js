@@ -1,4 +1,4 @@
-// Interacción de las pantallas de Chacra Futura (sin dependencias)
+// Interacción de las pantallas de Chacra (sin dependencias)
 // Idioma: las pantallas web cargan i18n.js antes; las de movil/ (ilustrativas) no, y quedan en español.
 const hayIdiomas = typeof traducirPagina === "function";
 const texto_ = hayIdiomas ? t : (s, v) => s.replace(/\{(\w+)\}/g, (_, k) => v[k]);
@@ -100,7 +100,7 @@ document.querySelectorAll("[data-speak]").forEach((btn) => {
 
 // WhatsApp: comparte la opción recomendada
 document.querySelectorAll("[data-whatsapp]").forEach((a) => {
-  const text = "Chacra Futura: mi mejor opción es Maíz → Haba → Trigo. Cuida la tierra y pide poca agua. (Ejemplo con datos ilustrativos)";
+  const text = "Chacra: mi mejor opción es Maíz → Haba → Trigo. Cuida la tierra y pide poca agua. (Ejemplo con datos ilustrativos)";
   a.href = "https://wa.me/?text=" + encodeURIComponent(text);
   a.target = "_blank";
   a.rel = "noopener";

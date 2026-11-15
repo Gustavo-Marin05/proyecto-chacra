@@ -1,6 +1,6 @@
 # Frontend
 
-Este es el frontend de Chacra Futura. Está hecho en HTML, CSS y JavaScript puros. La guía de estilos está en `../design.md`.
+Este es el frontend de Chacra. Está hecho en HTML, CSS y JavaScript puros. La guía de estilos está en `../design.md`.
 
 ## Flujo real (web)
 

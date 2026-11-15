@@ -1,4 +1,4 @@
-// Idiomas de Chacra Futura: español (original) e inglés.
+// Idiomas de Chacra: español (original) e inglés.
 // El español está escrito en el HTML y en el JavaScript; este archivo tiene su traducción.
 // - Textos fijos: traducirPagina() recorre la pantalla y cambia cada texto que esté en EN.
 // - Textos que arma el JavaScript: se piden con t("texto en español", { variables }).
@@ -18,7 +18,7 @@ if (IDIOMA === "en") {
 
 const EN = {
   // ---------- Cabecera y pie ----------
-  "Chacra Futura, inicio": "Chacra Futura, home",
+  "Chacra, inicio": "Chacra, home",
   "Navegación principal": "Main navigation",
   "Inicio": "Home",
   "Mi chacra": "My farm",
@@ -27,11 +27,11 @@ const EN = {
   "Cambiar idioma": "Change language",
   "Con datos satelitales de NASA. Esta herramienta apoya, no reemplaza a un técnico de tu zona.": "With NASA satellite data. This tool supports, and does not replace, a local agronomist.",
   "Ver versión móvil": "See mobile version",
-  "Chacra Futura": "Chacra Futura",
-  "Inicio · Chacra Futura": "Home · Chacra Futura",
-  "Mi chacra · Chacra Futura": "My farm · Chacra Futura",
-  "Resultado · Chacra Futura": "Result · Chacra Futura",
-  "Mis terrenos · Chacra Futura": "My plots · Chacra Futura",
+  "Tierra 3D": "3D Earth",
+  "Inicio · Chacra": "Home · Chacra",
+  "Mi chacra · Chacra": "My farm · Chacra",
+  "Resultado · Chacra": "Result · Chacra",
+  "Mis terrenos · Chacra": "My plots · Chacra",
 
   // ---------- Inicio ----------
   "Paisaje de chacra con colinas verdes y sol": "Farm landscape with green hills and sun",
@@ -42,6 +42,23 @@ const EN = {
   "Ver un ejemplo": "See an example",
   "Funciona con datos de NASA POWER y MODIS.": "Runs on NASA POWER and MODIS data.",
   "Así funciona": "How it works",
+  "Cultivos que conocemos": "Crops we know",
+  "Chacra compara rotaciones con los cultivos más comunes de los valles y llanos de Bolivia.": "Chacra compares rotations with the most common crops of Bolivia's valleys and lowlands.",
+  "Lo que afecta a las chacras de Bolivia": "What affects Bolivia's farms",
+  "Estos problemas son reales y se repiten cada año. Por eso comparamos rotaciones con datos satelitales.": "These problems are real and come back every year. That is why we compare rotations with satellite data.",
+  "Incendios en la Chiquitania": "Fires in the Chiquitania",
+  "El fuego destruye cultivos, pastos y monte.": "Fire destroys crops, pasture and forest.",
+  "Quemas agrícolas": "Agricultural burning",
+  "Vistas desde el satélite MODIS de la NASA.": "Seen from NASA's MODIS satellite.",
+  "Bosque amenazado": "Threatened forest",
+  "Se pierde monte y se seca el suelo.": "Forest is lost and the soil dries out.",
+  "Inundaciones": "Floods",
+  "Las lluvias fuertes cortan caminos y anegan parcelas.": "Heavy rains cut off roads and flood plots.",
+  "Bosque chiquitano amenazado": "Threatened Chiquitano forest",
+  "Camino inundado en Bolivia": "Flooded road in Bolivia",
+  "Familia campesina boliviana sembrando papa con una yunta de bueyes": "Bolivian farming family sowing potatoes with a team of oxen",
+  "Gran incendio forestal en San José de Chiquitos, Santa Cruz": "Large forest fire in San José de Chiquitos, Santa Cruz",
+  "Imagen satelital de la NASA con quemas agrícolas en Santa Cruz": "NASA satellite image showing agricultural burning in Santa Cruz",
   "Paso 1": "Step 1",
   "Paso 2": "Step 2",
   "Paso 3": "Step 3",
@@ -235,7 +252,7 @@ const EN = {
   "Ver mis terrenos": "See my plots",
   "No se pudo calcular.": "It could not be calculated.",
   "{error} Vuelve a intentarlo o cambia tus respuestas.": "{error} Try again or change your answers.",
-  "Chacra Futura: para {lugar}, la opción recomendada es {titulo}. {resumen} Es un apoyo; hay que revisarlo con un técnico.": "Chacra Futura: for {lugar}, the recommended option is {titulo}. {resumen} It is a support; it has to be reviewed with an agronomist.",
+  "Chacra: para {lugar}, la opción recomendada es {titulo}. {resumen} Es un apoyo; hay que revisarlo con un técnico.": "Chacra: for {lugar}, the recommended option is {titulo}. {resumen} It is a support; it has to be reviewed with an agronomist.",
 
   // ---------- Mis terrenos ----------
   "Cada terreno tiene su propia ubicación, cultivo y recomendación.": "Each plot has its own location, crop and recommendation.",
@@ -303,7 +320,7 @@ function traducirPagina() {
     const nuevo = traducir(n.nodeValue);
     if (nuevo != null) n.nodeValue = nuevo;
   }
-  for (const atributo of ["aria-label", "placeholder", "title"]) {
+  for (const atributo of ["aria-label", "placeholder", "title", "alt"]) {
     document.querySelectorAll(`[${atributo}]`).forEach((el) => {
       const nuevo = traducir(el.getAttribute(atributo));
       if (nuevo != null) el.setAttribute(atributo, nuevo);

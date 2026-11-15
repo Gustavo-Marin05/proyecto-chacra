@@ -1,0 +1,59 @@
+/* Tierra 3D: globo minimalista con datos de la NASA */
+.tierra-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: start; padding-top: 24px; }
+.tierra-globo { position: relative; width: 100%; height: min(80vh, 760px); min-height: 420px; border: 3px solid var(--green-700); border-radius: 24px; overflow: hidden; background: #050b1a; cursor: grab; touch-action: none; }
+.tierra-globo:active { cursor: grabbing; }
+.g-lienzo { position: absolute; inset: 0; z-index: 0; }
+.tierra-cargando { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-weight: 700; z-index: 1; pointer-events: none; }
+
+/* Controles sobre el globo: fondo oscuro, texto blanco, selección clara */
+.g-capas, .g-vistas { position: absolute; z-index: 2; display: flex; gap: 6px; padding: 6px; border-radius: 999px; background: rgba(8, 18, 38, .82); border: 2px solid rgba(255,255,255,.35); }
+.g-capas { top: 12px; left: 12px; right: 12px; overflow-x: auto; scrollbar-width: none; }
+.g-capas::-webkit-scrollbar { display: none; }
+.g-vistas { left: 12px; bottom: 36px; }
+.g-op { flex: none; min-height: 40px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: #fff; font-weight: 700; font-size: .95rem; white-space: nowrap; }
+.g-op:hover { background: rgba(255,255,255,.18); }
+.g-op[aria-pressed="true"] { background: #fff; color: var(--green-900); }
+.g-zoom { position: absolute; z-index: 2; right: 12px; bottom: 36px; display: grid; gap: 6px; }
+.g-zoom button { width: 48px; height: 48px; border-radius: 50%; border: 2px solid rgba(255,255,255,.35); background: rgba(8, 18, 38, .82); color: #fff; font-size: 1.6rem; font-weight: 700; line-height: 1; }
+.g-zoom button:hover { background: rgba(255,255,255,.25); }
+.g-nota { position: absolute; z-index: 2; left: 12px; right: 12px; bottom: 8px; margin: 0; font-size: .72rem; line-height: 1.2; color: rgba(255,255,255,.85); text-shadow: 0 1px 3px #000; pointer-events: none; }
+
+.tierra-side { display: grid; gap: 16px; }
+.tierra-side .panel { padding: 18px; }
+.tierra-side h2 { font-size: 1.25rem; }
+.cl-datos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+.cl-datos div { padding: 8px 10px; border: 2px solid var(--green-700); border-radius: 12px; background: var(--green-100); }
+.cl-datos dt { font-size: .75rem; font-weight: 700; }
+.cl-datos dd { margin: 0; font-size: 1.1rem; font-weight: 800; color: var(--green-900); }
+.cl-meses { display: grid; gap: 3px; }
+.cl-mes { display: grid; grid-template-columns: 30px 1fr 62px; align-items: center; gap: 8px; font-size: .8rem; font-weight: 700; }
+.cl-barra { height: 8px; border-radius: 999px; background: var(--green-100); overflow: hidden; }
+.cl-barra span { display: block; height: 100%; background: #2a7fd4; border-radius: 999px; }
+.cl-temp { text-align: right; font-weight: 600; }
+.is-hidden { display: none; }
+
+.tierra-vista { margin-bottom: 10px; }
+.tierra-vista .chip { min-height: 40px; padding: 0 16px; border-width: 2px; }
+.ciudades-leyenda { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 8px 0; font-size: .75rem; font-weight: 600; }
+.ciudades-leyenda li { display: flex; align-items: center; gap: 5px; }
+.ciudades-lista { display: grid; gap: 4px; margin-top: 8px; max-height: 340px; overflow-y: auto; }
+.ciudad { display: grid; grid-template-columns: 12px 1fr auto; align-items: center; gap: 8px; width: 100%; padding: 6px 10px; text-align: left; background: var(--white); border: 2px solid var(--green-100); border-radius: 10px; font-size: .82rem; }
+.ciudad:hover { background: var(--green-100); border-color: var(--green-700); }
+.ciudad b { font-weight: 800; color: var(--green-900); }
+.ciudad-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--green-900); display: inline-block; }
+
+@media (max-width: 900px) {
+  .tierra-wrap { grid-template-columns: 1fr; }
+  .tierra-globo { height: 68vh; min-height: 380px; }
+  .g-vistas { bottom: 44px; }
+  .g-zoom { bottom: 44px; }
+}
+
+/* Marcadores de pueblos (HTML sobre el globo): punto chico + nombre legible con tildes */
+.g-pueblo { position: relative; width: 0; height: 0; padding: 0; border: 0; background: none; pointer-events: auto; cursor: pointer; }
+.g-pueblo[data-atras="1"] { display: none; }
+.g-punto { position: absolute; left: -5px; top: -5px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.6), 0 1px 3px rgba(0,0,0,.6); }
+.g-nombre { position: absolute; left: 9px; top: -9px; white-space: nowrap; font: 600 12px/18px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #fff; text-shadow: 0 0 3px #000, 0 0 2px #000, 0 1px 2px #000; pointer-events: none; }
+.g-pueblo.sin-nombre .g-nombre { display: none; }
+.g-pueblo:hover .g-nombre, .g-pueblo:focus-visible .g-nombre { display: block; font-weight: 800; z-index: 1; }
+.g-pueblo:hover .g-punto { transform: scale(1.3); }
