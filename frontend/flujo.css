@@ -4,7 +4,7 @@
 .field input { min-height: 48px; padding: 0 16px; border: 2px solid var(--green-500); border-radius: var(--radius); font: inherit; color: var(--ink); background: var(--white); width: 100%; }
 .fields .btn { min-height: 48px; }
 .btn[disabled] { opacity: .6; cursor: progress; transform: none; box-shadow: none; }
-.is-hidden { display: none; }
+.is-hidden { display: none !important; }
 .err { background: var(--white); border-style: dashed; border-color: var(--green-900); }
 
 /* Celdas de la tabla: el estado va también escrito en las dos últimas filas */
@@ -24,7 +24,7 @@
 /* Mapa real (Leaflet) */
 .map#mapa { height: 320px; z-index: 0; isolation: isolate; background: var(--green-100); }
 .pin { color: var(--green-900); filter: drop-shadow(0 3px 4px rgba(20, 83, 45, .35)); }
-.pin svg { display: block; fill: var(--yellow-500); }
+.map .pin svg { display: block; width: 40px; height: 40px; fill: var(--yellow-500); } /* gana a ".map svg" de app.css, que lo estiraba a 180px */
 .loc small { font-weight: 400; }
 .loc[disabled] { opacity: .6; cursor: progress; }
 
