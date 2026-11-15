@@ -14,12 +14,15 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 from pathlib import Path
 
+from idioma import decimal, tr
+
 CACHE = Path(__file__).parent / "cache"
 AGENTE = "demo-rotacion-cultivos/0.1"
 POWER_URL = "https://power.larc.nasa.gov/api/temporal/daily/point"
 MODIS_URL = "https://modis.ornl.gov/rst/api/v1/MOD13Q1"
 
-MESES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+MESES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]  # también son claves de datos
+MESES_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 CAMPANIAS = 10          # campañas agrícolas (julio a junio) de clima
 FECHAS_NDVI = 69        # 3 años de NDVI (23 fechas por año); el servicio es lento
 FECHAS_POR_PEDIDO = 10  # el servicio de MODIS no responde pedidos más largos
@@ -72,7 +75,12 @@ def _media(valores):
 
 
 def _coma(valor):
-    return f"{valor:.2f}".replace(".", ",")
+    return decimal(valor, 2)
+
+
+def mes(indice):
+    """Nombre corto del mes en el idioma del pedido."""
+    return tr(MESES[indice], MESES_EN[indice])
 
 
 def _redondear(valor, decimales=1):
@@ -113,7 +121,7 @@ def peor(a, b):
 
 
 def _lista(indices):
-    return ", ".join(MESES[i] for i in indices)
+    return ", ".join(mes(i) for i in indices)
 
 
 # ---------- NASA POWER: lluvia y temperatura diarias ----------
@@ -123,7 +131,39 @@ def clima(lat, lon, hoy=None):
     # Última campaña completa (julio a junio), con margen por el retraso de los datos.
     cierre = hoy.year if hoy >= date(hoy.year, 9, 1) else hoy.year - 1
     inicio = cierre - CAMPANIAS
-    return _con_cache(f"clima_{_clave(lat, lon)}_{inicio}_{cierre}", lambda: _clima(lat, lon, inicio, cierre))
+    return _textos_clima(_con_cache(f"clima_{_clave(lat, lon)}_{inicio}_{cierre}", lambda: _clima(lat, lon, inicio, cierre)))
+
+
+def _textos_clima(d):
+    """Textos del clima en el idioma del pedido. Van fuera de la caché, que solo guarda datos."""
+    esc, meses = d["escenarios"], d["meses"]
+    campanias = esc["normal"]["campanias"]
+    inicio, fin = int(campanias[0][:4]), int(campanias[-1][:4]) + 1
+    d["fuente"] = tr("NASA POWER (MERRA-2), datos diarios", "NASA POWER (MERRA-2), daily data")
+    d["periodo"] = tr(f"julio de {inicio} a junio de {fin}", f"July {inicio} to June {fin}")
+    esc["normal"]["descripcion"] = tr("Promedio de todas las campañas", "Average of all seasons")
+    esc["menos"]["descripcion"] = tr("Promedio de las 3 campañas más secas", "Average of the 3 driest seasons")
+    esc["mucho"]["descripcion"] = tr("La campaña más seca del periodo", "The driest season of the period")
+
+    secos = [i for i, x in enumerate(meses) if x["agua"] == "bad"]
+    con_helada = [i for i, x in enumerate(meses) if x["heladas"] != "ok"]
+    hallazgos = []
+    if secos:
+        hallazgos.append(tr(f"Casi no llueve en: {_lista(secos)} (menos de {REGLAS['agua']['ojo_desde_mm']} mm al mes).",
+                            f"It hardly rains in: {_lista(secos)} (less than {REGLAS['agua']['ojo_desde_mm']} mm a month)."))
+    if con_helada:
+        hallazgos.append(tr(f"Suele helar en: {_lista(con_helada)} (al menos 1 día al mes bajo cero).",
+                            f"Frost is usual in: {_lista(con_helada)} (at least 1 day a month below zero)."))
+    else:
+        hallazgos.append(tr("En promedio no se registran heladas en ningún mes.", "On average no month records frost."))
+    seca, normal = esc["mucho"], esc["normal"]
+    hallazgos.append(tr(
+        f"La campaña más seca fue {seca['campanias'][0]}, con {seca['lluvia_anual_mm']} mm; "
+        f"lo normal son {normal['lluvia_anual_mm']} mm al año.",
+        f"The driest season was {seca['campanias'][0]}, with {seca['lluvia_anual_mm']} mm; "
+        f"the normal amount is {normal['lluvia_anual_mm']} mm a year."))
+    d["hallazgos"] = hallazgos
+    return d
 
 
 def _clima(lat, lon, inicio, cierre):
@@ -187,11 +227,10 @@ def _clima(lat, lon, inicio, cierre):
     def nombre(c):
         return f"{c}-{str(c + 1)[2:]}"
 
-    def escenario(lista, descripcion):
+    def escenario(lista):
         mm = lluvia_mensual(lista)
         estados = [estado_agua(v) for v in mm]
         return {
-            "descripcion": descripcion,
             "campanias": [nombre(c) for c in lista],
             "lluvia_mm": mm,
             "lluvia_anual_mm": round(sum(v for v in mm if v is not None)),
@@ -200,31 +239,14 @@ def _clima(lat, lon, inicio, cierre):
         }
 
     escenarios = {
-        "normal": escenario(campanias, "Promedio de todas las campañas"),
-        "menos": escenario(sorted(secas), "Promedio de las 3 campañas más secas"),
-        "mucho": escenario([mas_seca], "La campaña más seca del periodo"),
+        "normal": escenario(campanias),     # promedio de todas las campañas
+        "menos": escenario(sorted(secas)),  # promedio de las 3 más secas
+        "mucho": escenario([mas_seca]),     # la más seca del periodo
     }
-    secos = [i for i, x in enumerate(meses) if x["agua"] == "bad"]
-    con_helada = [i for i, x in enumerate(meses) if x["heladas"] != "ok"]
-    hallazgos = []
-    if secos:
-        hallazgos.append(f"Casi no llueve en: {_lista(secos)} (menos de {REGLAS['agua']['ojo_desde_mm']} mm al mes).")
-    if con_helada:
-        hallazgos.append(f"Suele helar en: {_lista(con_helada)} (al menos 1 día al mes bajo cero).")
-    else:
-        hallazgos.append("En promedio no se registran heladas en ningún mes.")
-    hallazgos.append(
-        f"La campaña más seca fue {nombre(mas_seca)}, con {escenarios['mucho']['lluvia_anual_mm']} mm; "
-        f"lo normal son {escenarios['normal']['lluvia_anual_mm']} mm al año."
-    )
-
     return {
-        "fuente": "NASA POWER (MERRA-2), datos diarios",
-        "periodo": f"julio de {campanias[0]} a junio de {campanias[-1] + 1}",
         "altitud_m": round(altitud),
         "meses": meses,
         "escenarios": escenarios,
-        "hallazgos": hallazgos,
     }
 
 
@@ -233,7 +255,36 @@ def _clima(lat, lon, inicio, cierre):
 def ndvi(lat, lon, hoy=None):
     hoy = hoy or date.today()
     # La clave incluye el mes para que la caché se renueve cuando llegan fechas nuevas.
-    return _con_cache(f"ndvi_{_clave(lat, lon)}_{hoy:%Y%m}", lambda: _ndvi(lat, lon))
+    return _textos_ndvi(_con_cache(f"ndvi_{_clave(lat, lon)}_{hoy:%Y%m}", lambda: _ndvi(lat, lon)))
+
+
+def _textos_ndvi(d):
+    """Textos del verdor en el idioma del pedido, armados con los datos de la caché."""
+    meses, serie, caida = d["meses"], d["serie"], d.get("caida_reciente")
+    d["fuente"] = tr("MODIS MOD13Q1 (Terra), NDVI cada 16 días, píxel de 250 m",
+                     "MODIS MOD13Q1 (Terra), NDVI every 16 days, 250 m pixel")
+    d["periodo"] = tr(f"{serie[0]['fecha']} a {serie[-1]['fecha']}", f"{serie[0]['fecha']} to {serie[-1]['fecha']}")
+    con_dato = [i for i, x in enumerate(meses) if x["ndvi"] is not None]
+    alto = max(con_dato, key=lambda i: meses[i]["ndvi"])
+    bajo = min(con_dato, key=lambda i: meses[i]["ndvi"])
+    hallazgos = [tr(
+        f"El satélite ve más verde en {mes(alto)} (NDVI {_coma(meses[alto]['ndvi'])}) "
+        f"y menos en {mes(bajo)} (NDVI {_coma(meses[bajo]['ndvi'])}).",
+        f"The satellite sees the most green in {mes(alto)} (NDVI {_coma(meses[alto]['ndvi'])}) "
+        f"and the least in {mes(bajo)} (NDVI {_coma(meses[bajo]['ndvi'])}).")]
+    desnudo = [i for i in con_dato if meses[i]["suelo"] == "bad"]
+    if desnudo:
+        hallazgos.append(tr(f"La zona se ve casi sin vegetación en: {_lista(desnudo)}.",
+                            f"The area looks almost bare of vegetation in: {_lista(desnudo)}."))
+    if caida:
+        m = mes(MESES.index(caida["mes"]))
+        hallazgos.append(tr(
+            f"En {m} de {caida['anio']} el satélite vio menos verde que lo habitual "
+            f"(NDVI {_coma(caida['ndvi'])} frente a {_coma(caida['habitual'])}).",
+            f"In {m} {caida['anio']} the satellite saw less green than usual "
+            f"(NDVI {_coma(caida['ndvi'])} versus {_coma(caida['habitual'])})."))
+    d["hallazgos"] = hallazgos
+    return d
 
 
 def _ndvi(lat, lon):
@@ -284,18 +335,6 @@ def _ndvi(lat, lon):
         promedio = _redondear(_media(del_mes), 2)
         meses.append({"mes": MESES[m - 1], "ndvi": promedio, "observaciones": len(del_mes), "suelo": estado_suelo(promedio)})
 
-    hallazgos = []
-    con_dato = [i for i, x in enumerate(meses) if x["ndvi"] is not None]
-    alto = max(con_dato, key=lambda i: meses[i]["ndvi"])
-    bajo = min(con_dato, key=lambda i: meses[i]["ndvi"])
-    hallazgos.append(
-        f"El satélite ve más verde en {MESES[alto]} (NDVI {_coma(meses[alto]['ndvi'])}) "
-        f"y menos en {MESES[bajo]} (NDVI {_coma(meses[bajo]['ndvi'])})."
-    )
-    desnudo = [i for i in con_dato if meses[i]["suelo"] == "bad"]
-    if desnudo:
-        hallazgos.append(f"La zona se ve casi sin vegetación en: {_lista(desnudo)}.")
-
     # Último año frente a los anteriores: el mes con la mayor caída de verdor.
     ultimo_dia = date.fromisoformat(serie[-1]["fecha"])
     corte = ultimo_dia.replace(year=ultimo_dia.year - 1).isoformat()
@@ -311,18 +350,11 @@ def _ndvi(lat, lon):
             caida = {"mes": MESES[m - 1], "anio": anio, "ndvi": round(ahora, 2), "habitual": round(antes, 2), "razon": ahora / antes}
     if caida:
         caida.pop("razon")
-        hallazgos.append(
-            f"En {caida['mes']} de {caida['anio']} el satélite vio menos verde que lo habitual "
-            f"(NDVI {_coma(caida['ndvi'])} frente a {_coma(caida['habitual'])})."
-        )
 
     return {
-        "fuente": "MODIS MOD13Q1 (Terra), NDVI cada 16 días, píxel de 250 m",
-        "periodo": f"{serie[0]['fecha']} a {serie[-1]['fecha']}",
         "observaciones": len(serie),
         "descartadas_por_calidad": descartados,
         "meses": meses,
         "caida_reciente": caida,
-        "hallazgos": hallazgos,
         "serie": serie,
     }

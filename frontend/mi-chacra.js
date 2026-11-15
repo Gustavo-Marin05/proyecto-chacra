@@ -6,28 +6,31 @@ const PRIORIDAD = {
   "Ahorrar agua": "agua", "Cuidar la tierra": "suelo", "Ganar más": "ingreso",
   "Menos erosión": "erosion", "Alimento para animales": "forraje", "Devolver fuerza al suelo": "fuerza",
 };
-const AGUA = { Poca: "poca", Media: "media", Buena: "buena" };
-const MAQUINARIA = { Ninguna: "ninguna", "Básica": "basica", Completa: "completa" };
+// Los botones de agua y maquinaria se reconocen por su posición, no por su texto (que se traduce).
+const AGUA = ["poca", "media", "buena"];
+const MAQUINARIA = ["ninguna", "basica", "completa"];
 const AGUA_TEXTO = { poca: "Poca agua", media: "Agua media", buena: "Buena agua" };
 const MAQ_TEXTO = { ninguna: "sin maquinaria", basica: "maquinaria básica", completa: "maquinaria completa" };
 
 const $ = (id) => document.getElementById(id);
 const invertir = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [v, k]));
-const texto = (el) => el.textContent.trim();
 
 const paneles = document.querySelectorAll(".col-main .panel");
 const fichasCultivo = [...paneles[1].querySelectorAll(".tile")];
 const fichasPrioridad = [...paneles[2].querySelectorAll(".tile")];
 const [chipsAgua, chipsMaq] = [...paneles[2].querySelectorAll(".chips")].map((g) => [...g.children]);
 const [ddLugar, ddCultivo, ddPrio1, ddPrio2, ddLimites] = document.querySelectorAll(".summary dd");
-const botonesLugar = [$("loc-aqui"), $("loc-comunidad"), $("loc-mapa")];
 
+// La pantalla empieza vacía. Solo al volver desde el resultado ("Cambiar mis respuestas",
+// mi-chacra.html?editar=1) se recupera lo que la persona ya había respondido.
 let guardado = {};
-try { guardado = JSON.parse(localStorage.getItem(CLAVE)) || {}; } catch { guardado = {}; }
+if (new URLSearchParams(location.search).has("editar")) {
+  try { guardado = JSON.parse(localStorage.getItem(CLAVE)) || {}; } catch { guardado = {}; }
+}
 const estado = { lat: null, lon: null, lugar: null, ...guardado };
 
 // ---------- Mapa ----------
-const mapa = L.map("mapa", { scrollWheelZoom: false }).setView([-17, -65], 5);
+const mapa = L.map("mapa").setView([-17, -65], 5);
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 18,
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
@@ -43,7 +46,7 @@ let marcador = null;
 let pedidoLugar = 0;
 
 function marcar(boton) {
-  botonesLugar.forEach((b) => setSelected(b, b === boton));
+  setSelected($("loc-aqui"), boton === $("loc-aqui"));
 }
 
 function avisoLugar(mensaje) {
@@ -54,19 +57,19 @@ function coordenadas() {
   return `${estado.lat.toFixed(4)}, ${estado.lon.toFixed(4)}`;
 }
 
-async function ponerPunto(lat, lon, boton, nombre, acercar = true) {
+async function ponerPunto(lat, lon, boton, nombre, acercar = 12) {
   estado.lat = Math.round(lat * 1e4) / 1e4;
   estado.lon = Math.round(lon * 1e4) / 1e4;
   estado.lugar = nombre || null;
   if (!marcador) marcador = L.marker([lat, lon], { icon: icono, keyboard: false }).addTo(mapa);
   marcador.setLatLng([lat, lon]);
-  if (acercar) mapa.setView([lat, lon], Math.max(mapa.getZoom(), 12));
-  if (boton) marcar(boton);
+  if (acercar) mapa.flyTo([lat, lon], Math.max(mapa.getZoom(), acercar), { duration: 1.2 });
+  marcar(boton);
   actualizar();
   const este = ++pedidoLugar; // descarta el nombre de un punto anterior que llegue tarde
   if (nombre) return;
   try {
-    const r = await fetch(`/api/lugar?lat=${estado.lat}&lon=${estado.lon}`);
+    const r = await fetch(api(`/api/lugar?lat=${estado.lat}&lon=${estado.lon}`));
     const d = await r.json();
     if (este === pedidoLugar && d.nombre) {
       estado.lugar = d.nombre;
@@ -75,34 +78,24 @@ async function ponerPunto(lat, lon, boton, nombre, acercar = true) {
   } catch { /* sin nombre: se muestran las coordenadas */ }
 }
 
-mapa.on("click", (e) => ponerPunto(e.latlng.lat, e.latlng.lng, $("loc-mapa"), null, false));
+mapa.on("click", (e) => ponerPunto(e.latlng.lat, e.latlng.lng, null, null, 0));
 
 $("loc-aqui").addEventListener("click", () => {
-  if (!navigator.geolocation) return avisoLugar("Este navegador no permite usar la ubicación. Toca el mapa o busca tu comunidad.");
+  if (!navigator.geolocation) return avisoLugar(t("Este navegador no permite usar la ubicación. Toca el mapa o busca tu comunidad."));
   $("loc-aqui").disabled = true;
-  avisoLugar("Buscando tu ubicación…");
+  avisoLugar(t("Buscando tu ubicación…"));
   navigator.geolocation.getCurrentPosition(
     (pos) => {
       $("loc-aqui").disabled = false;
-      ponerPunto(pos.coords.latitude, pos.coords.longitude, $("loc-aqui"));
+      $("mapa").scrollIntoView({ behavior: "smooth", block: "center" });
+      ponerPunto(pos.coords.latitude, pos.coords.longitude, $("loc-aqui"), null, 15);
     },
     () => {
       $("loc-aqui").disabled = false;
-      avisoLugar("No se pudo obtener tu ubicación. Toca el mapa o busca tu comunidad.");
+      avisoLugar(t("No se pudo obtener tu ubicación. Toca el mapa o busca tu comunidad."));
     },
     { timeout: 15000 }
   );
-});
-
-$("loc-mapa").addEventListener("click", () => {
-  $("mapa").scrollIntoView({ block: "center" });
-  avisoLugar("Toca en el mapa el lugar donde está tu chacra.");
-});
-
-$("loc-comunidad").addEventListener("click", () => {
-  const abierto = $("buscar-form").classList.toggle("is-hidden") === false;
-  $("loc-comunidad").setAttribute("aria-expanded", String(abierto));
-  if (abierto) $("buscar").focus();
 });
 
 $("buscar-form").addEventListener("submit", async (e) => {
@@ -110,13 +103,13 @@ $("buscar-form").addEventListener("submit", async (e) => {
   const lista = $("buscar-res");
   const consulta = $("buscar").value.trim();
   if (consulta.length < 2) return;
-  lista.replaceChildren(Object.assign(document.createElement("li"), { textContent: "Buscando…" }));
+  lista.replaceChildren(Object.assign(document.createElement("li"), { textContent: t("Buscando…") }));
   try {
-    const r = await fetch("/api/buscar?q=" + encodeURIComponent(consulta));
+    const r = await fetch(api("/api/buscar?q=" + encodeURIComponent(consulta)));
     const d = await r.json();
     if (!r.ok) throw new Error(d.error);
     if (!d.resultados.length) {
-      lista.replaceChildren(Object.assign(document.createElement("li"), { textContent: "No se encontró ese lugar. Prueba con el municipio o toca el mapa." }));
+      lista.replaceChildren(Object.assign(document.createElement("li"), { textContent: t("No se encontró ese lugar. Prueba con el municipio o toca el mapa.") }));
       return;
     }
     lista.replaceChildren(...d.resultados.map((res) => {
@@ -130,15 +123,13 @@ $("buscar-form").addEventListener("submit", async (e) => {
       b.append(span);
       b.addEventListener("click", () => {
         lista.replaceChildren();
-        $("buscar-form").classList.add("is-hidden");
-        $("loc-comunidad").setAttribute("aria-expanded", "false");
-        ponerPunto(res.lat, res.lon, $("loc-comunidad"), res.nombre);
+        ponerPunto(res.lat, res.lon, null, res.nombre);
       });
       li.append(b);
       return li;
     }));
   } catch (err) {
-    lista.replaceChildren(Object.assign(document.createElement("li"), { textContent: err.message || "No se pudo buscar. Toca el mapa para marcar tu chacra." }));
+    lista.replaceChildren(Object.assign(document.createElement("li"), { textContent: err.message || t("No se pudo buscar. Toca el mapa para marcar tu chacra.") }));
   }
 });
 
@@ -148,14 +139,17 @@ function leer() {
   const cultivo = elegido(fichasCultivo);
   estado.cultivo = cultivo ? CULTIVO[cultivo.dataset.label] : null;
   estado.prioridades = fichasPrioridad.filter((el) => el.classList.contains("is-selected")).map((el) => PRIORIDAD[el.dataset.label]);
-  estado.agua = AGUA[texto(elegido(chipsAgua))];
-  estado.maquinaria = MAQUINARIA[texto(elegido(chipsMaq))];
+  const agua = elegido(chipsAgua);
+  const maq = elegido(chipsMaq);
+  estado.agua = agua ? AGUA[chipsAgua.indexOf(agua)] : null;
+  estado.maquinaria = maq ? MAQUINARIA[chipsMaq.indexOf(maq)] : null;
 }
 
 function enlace() {
   const q = new URLSearchParams({
     lat: estado.lat, lon: estado.lon, cultivo: estado.cultivo,
-    prioridades: estado.prioridades.join(","), agua: estado.agua, maquinaria: estado.maquinaria,
+    prioridades: estado.prioridades.join(","),
+    agua: estado.agua || "poca", maquinaria: estado.maquinaria || "ninguna", // sin elegir: lo más prudente
   });
   if (estado.lugar) q.set("lugar", estado.lugar);
   return "resultado.html?" + q;
@@ -165,41 +159,101 @@ function actualizar() {
   leer();
   const hayPunto = estado.lat != null;
   const nombres = invertir(PRIORIDAD);
-  ddLugar.textContent = hayPunto ? estado.lugar || coordenadas() : "Sin elegir";
-  ddCultivo.textContent = estado.cultivo ? invertir(CULTIVO)[estado.cultivo] : "Sin elegir";
-  ddPrio1.textContent = nombres[estado.prioridades[0]] || "Sin elegir";
-  ddPrio2.textContent = nombres[estado.prioridades[1]] || "Sin elegir";
-  ddLimites.textContent = `${AGUA_TEXTO[estado.agua]} · ${MAQ_TEXTO[estado.maquinaria]}`;
-  if (hayPunto) avisoLugar(`Ubicación elegida: ${estado.lugar ? estado.lugar + " (" + coordenadas() + ")" : coordenadas()}`);
-  $("prio-count").textContent = `${estado.prioridades.length} de 2 elegidas.`;
+  ddLugar.textContent = hayPunto ? estado.lugar || coordenadas() : t("Sin elegir");
+  ddCultivo.textContent = t(estado.cultivo ? invertir(CULTIVO)[estado.cultivo] : "Sin elegir");
+  ddPrio1.textContent = t(nombres[estado.prioridades[0]] || "Sin elegir");
+  ddPrio2.textContent = t(nombres[estado.prioridades[1]] || "Sin elegir");
+  ddLimites.textContent = [AGUA_TEXTO[estado.agua], MAQ_TEXTO[estado.maquinaria]].filter(Boolean).map((x) => t(x)).join(" · ") || t("Sin elegir");
+  if (hayPunto) avisoLugar(t("Ubicación elegida: {lugar}", { lugar: estado.lugar ? estado.lugar + " (" + coordenadas() + ")" : coordenadas() }));
+  $("prio-count").textContent = t("{n} de 2 elegidas.", { n: estado.prioridades.length });
   const listo = hayPunto && estado.cultivo;
   $("ver").href = listo ? enlace() : "resultado.html";
   if (listo) $("falta").classList.add("is-hidden");
-  try { localStorage.setItem(CLAVE, JSON.stringify(estado)); } catch { /* sin almacenamiento */ }
+  // Abrir la pantalla vacía no borra lo guardado; se guarda desde la primera respuesta.
+  if (hayPunto || estado.cultivo) {
+    try { localStorage.setItem(CLAVE, JSON.stringify(estado)); } catch { /* sin almacenamiento */ }
+  }
 }
 
 $("ver").addEventListener("click", (e) => {
   leer();
   const faltan = [];
-  if (estado.lat == null) faltan.push("marca dónde está tu chacra");
-  if (!estado.cultivo) faltan.push("elige qué siembras hoy");
+  if (estado.lat == null) faltan.push(t("marca dónde está tu chacra"));
+  if (!estado.cultivo) faltan.push(t("elige qué siembras hoy"));
   if (!faltan.length) return;
   e.preventDefault();
-  $("falta").querySelector("span").textContent = "Antes de seguir: " + faltan.join(" y ") + ".";
+  $("falta").querySelector("span").textContent = t("Antes de seguir: {faltan}.", { faltan: faltan.join(t(" y ")) });
   $("falta").classList.remove("is-hidden");
   (estado.lat == null ? paneles[0] : paneles[1]).scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+// ---------- Guardar el terreno en el backend ----------
+// Con mi-chacra.html?terreno=<id> se edita un terreno ya guardado.
+const terrenoId = new URLSearchParams(location.search).get("terreno");
+
+function errorGuardar(mensaje) {
+  $("guardar-error").querySelector("span").textContent = mensaje || "";
+  $("guardar-error").classList.toggle("is-hidden", !mensaje);
+}
+
+$("guardar-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  leer();
+  const nombre = $("nombre").value.trim();
+  const faltan = [];
+  if (estado.lat == null) faltan.push(t("marca dónde está"));
+  if (!estado.cultivo) faltan.push(t("elige qué siembras hoy"));
+  if (!nombre) faltan.push(t("ponle un nombre"));
+  if (faltan.length) {
+    errorGuardar(t("Para guardar el terreno: {faltan}.", { faltan: faltan.join(", ") }));
+    if (estado.lat != null && estado.cultivo) $("nombre").focus();
+    return;
+  }
+  errorGuardar("");
+  $("guardar").disabled = true;
+  const terreno = {
+    nombre, lat: estado.lat, lon: estado.lon, lugar: estado.lugar || "", cultivo: estado.cultivo,
+    prioridades: estado.prioridades, agua: estado.agua || "poca", maquinaria: estado.maquinaria || "ninguna",
+  };
+  try {
+    await (terrenoId ? pedirTerrenos("/" + terrenoId, "PUT", terreno) : pedirTerrenos("", "POST", terreno));
+    location.href = "terrenos.html";
+  } catch (err) {
+    $("guardar").disabled = false;
+    errorGuardar(err.message);
+  }
 });
 
 // app.js cambia las selecciones en el mismo clic; se lee después.
 paneles.forEach((p) => p.addEventListener("click", () => setTimeout(actualizar)));
 
-// ---------- Estado inicial: lo guardado, o nada elegido ----------
-fichasCultivo.forEach((el) => setSelected(el, CULTIVO[el.dataset.label] === guardado.cultivo));
-fichasPrioridad.forEach((el) => setSelected(el, (guardado.prioridades || []).includes(PRIORIDAD[el.dataset.label])));
-chipsAgua.forEach((el) => setSelected(el, AGUA[texto(el)] === (guardado.agua || "poca")));
-chipsMaq.forEach((el) => setSelected(el, MAQUINARIA[texto(el)] === (guardado.maquinaria || "ninguna")));
-if (typeof guardado.lat === "number" && typeof guardado.lon === "number") {
-  ponerPunto(guardado.lat, guardado.lon, null, guardado.lugar);
+// Al cambiar de idioma la página se recarga; si ya hay respuestas, se vuelve en modo editar
+// para no perderlas (están guardadas en el navegador).
+window.alCambiarIdioma = () => (!terrenoId && (estado.lat != null || estado.cultivo) ? "mi-chacra.html?editar=1" : null);
+
+// ---------- Estado inicial: nada elegido, lo guardado al volver a editar, o un terreno ----------
+function iniciar(g) {
+  fichasCultivo.forEach((el) => setSelected(el, CULTIVO[el.dataset.label] === g.cultivo));
+  fichasPrioridad.forEach((el) => setSelected(el, (g.prioridades || []).includes(PRIORIDAD[el.dataset.label])));
+  chipsAgua.forEach((el, i) => setSelected(el, AGUA[i] === g.agua));
+  chipsMaq.forEach((el, i) => setSelected(el, MAQUINARIA[i] === g.maquinaria));
+  if (typeof g.lat === "number" && typeof g.lon === "number") {
+    ponerPunto(g.lat, g.lon, null, g.lugar);
+  } else {
+    actualizar();
+  }
+}
+
+if (terrenoId) {
+  $("guardar-titulo").textContent = t("Guarda los cambios del terreno");
+  $("guardar").textContent = t("Guardar cambios");
+  pedirTerrenos("/" + terrenoId).then((terreno) => {
+    $("nombre").value = terreno.nombre;
+    iniciar(terreno);
+  }).catch((err) => {
+    errorGuardar(err.message);
+    iniciar({});
+  });
 } else {
-  actualizar();
+  iniciar(guardado);
 }

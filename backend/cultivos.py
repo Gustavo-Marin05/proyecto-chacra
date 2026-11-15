@@ -13,6 +13,8 @@ Excepciones y supuestos propios, sin fuente todavía:
   - `helada`, `forraje` y `residuo` son clasificaciones agronómicas generales.
 """
 
+from idioma import tr
+
 CULTIVOS = {
     "maiz": {
         "nombre": "Maíz", "familia": "gramíneas", "leguminosa": False,
@@ -46,7 +48,21 @@ CULTIVOS = {
     },
 }
 
-FUENTE = "Ficha de cultivos: FAO, manual de riego n.º 3 (1986), valores generales por validar en la zona."
+NOMBRES_EN = {"maiz": "Maize", "papa": "Potato", "trigo": "Wheat", "haba": "Faba bean", "cebada": "Barley", "arveja": "Pea"}
+FAMILIAS_EN = {"gramíneas": "grasses", "solanáceas": "nightshades", "leguminosas": "legumes"}
+
+
+def fuente():
+    return tr("Ficha de cultivos: FAO, manual de riego n.º 3 (1986), valores generales por validar en la zona.",
+              "Crop sheet: FAO irrigation manual no. 3 (1986), general values still to be validated locally.")
+
+
+def nombre(cultivo):
+    return tr(CULTIVOS[cultivo]["nombre"], NOMBRES_EN[cultivo])
+
+
+def familia(nombre_es):
+    return tr(nombre_es, FAMILIAS_EN[nombre_es])
 
 
 def necesidad(cultivo):

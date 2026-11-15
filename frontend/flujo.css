@@ -26,6 +26,12 @@
 .pin { color: var(--green-900); filter: drop-shadow(0 3px 4px rgba(20, 83, 45, .35)); }
 .map .pin svg { display: block; width: 40px; height: 40px; fill: var(--yellow-500); } /* gana a ".map svg" de app.css, que lo estiraba a 180px */
 .loc small { font-weight: 400; }
+#buscar-form { grid-template-columns: minmax(0, 1fr) auto; }
+
+/* El resumen "Tu chacra" acompaña mientras se baja. Va en la columna y no en .summary:
+   la columna mide lo mismo que el resumen, así que dentro de ella no tenía recorrido. */
+.col-side { position: sticky; top: 96px; align-self: start; }
+@media (max-width: 900px) { .col-side { position: static; } }
 .loc[disabled] { opacity: .6; cursor: progress; }
 
 /* Resultado con datos reales */
@@ -41,3 +47,8 @@
 .year-full { grid-column: 1 / -1; display: grid; gap: 12px; }
 .empty { padding: 48px 0; display: grid; gap: 16px; justify-items: start; }
 .loading { display: flex; align-items: center; gap: 12px; }
+
+/* Mis terrenos */
+.terr .stats-inline { flex-wrap: wrap; gap: 8px; }
+.gt td.g-harv { color: var(--white); } /* ".gt td" de arriba le ponía texto verde sobre fondo verde */
+.terr-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }

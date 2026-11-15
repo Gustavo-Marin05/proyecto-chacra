@@ -1,6 +1,6 @@
 // Resultado: pide al backend las 3 rotaciones calculadas con el clima real y las dibuja.
 const MESES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-const NOMBRE = { ok: "Bien", warn: "Ojo", bad: "Evitar", nodata: "Sin dato" };
+const NOMBRE = { ok: t("Bien"), warn: t("Ojo"), bad: t("Evitar"), nodata: t("Sin dato") };
 const RELLENO = { ok: "#2E7D32", warn: "#F5C518", bad: "url(#hatch-rueda)", nodata: "#FFFFFF" };
 const SVG = "http://www.w3.org/2000/svg";
 const EJEMPLO = { lat: "-19.03", lon: "-65.26", lugar: "Sucre, Chuquisaca", cultivo: "maiz", prioridades: "agua,suelo", agua: "poca", maquinaria: "ninguna" };
@@ -16,7 +16,7 @@ const ICONO = {
 };
 
 const $ = (id) => document.getElementById(id);
-const num = (v, d = 0) => (v == null ? "–" : v.toLocaleString("es", { minimumFractionDigits: d, maximumFractionDigits: d }));
+const num = (v, d = 0) => (v == null ? "–" : v.toLocaleString(IDIOMA, { minimumFractionDigits: d, maximumFractionDigits: d }));
 
 function h(tag, props = {}, ...hijos) {
   const n = document.createElement(tag);
@@ -36,7 +36,7 @@ function pastilla(estado, texto) {
 }
 
 function lista(id, textos) {
-  $(id).replaceChildren(...textos.map((t) => h("li", {}, t)));
+  $(id).replaceChildren(...textos.map((texto) => h("li", {}, texto)));
 }
 
 // ---------- Estado ----------
@@ -73,18 +73,18 @@ function dibujarOpciones() {
     etiqueta.append(o.etiqueta);
     const stats = h("div", { class: "stats" }, ...["agua", "suelo", "heladas"].map((k) =>
       h("div", { class: "stat" },
-        (() => { const s = h("span", { class: "stat-name", icono: trazo(ICONO[k], 22) }); s.append({ agua: "Agua", suelo: "Suelo", heladas: "Heladas" }[k]); return s; })(),
-        pastilla(estados[k], k === "suelo" && estados[k] === "bad" ? "Mal" : null))));
+        (() => { const s = h("span", { class: "stat-name", icono: trazo(ICONO[k], 22) }); s.append(t({ agua: "Agua", suelo: "Suelo", heladas: "Heladas" }[k])); return s; })(),
+        pastilla(estados[k], k === "suelo" && estados[k] === "bad" ? t("Mal") : null))));
     const activo = o.id === viendo;
-    const boton = h("button", { type: "button", class: `btn btn-sm ${activo ? "btn-green" : "btn-outline"}`, "aria-pressed": String(activo), "data-ver": o.id }, activo ? "Viendo esta opción" : "Ver esta opción");
+    const boton = h("button", { type: "button", class: `btn btn-sm ${activo ? "btn-green" : "btn-outline"}`, "aria-pressed": String(activo), "data-ver": o.id }, t(activo ? "Viendo esta opción" : "Ver esta opción"));
     return h("article", { class: `opt opt-${o.id === "rec" ? "rec" : o.id}${activo ? " is-viewing" : ""}` }, etiqueta, h("h3", {}, o.titulo), h("p", {}, o.resumen), stats, boton);
   }));
 }
 
 function sector(rOut, rIn, a0, a1) {
   const p = (r, a) => {
-    const t = (a * Math.PI) / 180;
-    return `${(170 + r * Math.sin(t)).toFixed(1)} ${(170 - r * Math.cos(t)).toFixed(1)}`;
+    const ang = (a * Math.PI) / 180;
+    return `${(170 + r * Math.sin(ang)).toFixed(1)} ${(170 - r * Math.cos(ang)).toFixed(1)}`;
   };
   return `M${p(rOut, a0)} A${rOut} ${rOut} 0 0 1 ${p(rOut, a1)} L${p(rIn, a1)} A${rIn} ${rIn} 0 0 0 ${p(rIn, a0)}Z`;
 }
@@ -111,41 +111,43 @@ function dibujarRueda() {
     const a1 = i * 30 + 28.5;
     const estilo = (e) => ({ fill: RELLENO[e], stroke: "#14532D", "stroke-width": 1, ...(e === "nodata" ? { "stroke-dasharray": "2 3" } : {}) });
     rueda.append(svg("path", { d: sector(142, 114, a0, a1), ...estilo(fuera[i]) }), svg("path", { d: sector(110, 80, a0, a1), ...estilo(dentro[i]) }));
-    const t = ((i * 30 + 15) * Math.PI) / 180;
-    rueda.append(svg("text", { x: (170 + 157 * Math.sin(t)).toFixed(1), y: (174 - 157 * Math.cos(t)).toFixed(1), "text-anchor": "middle", "font-size": 11, "font-weight": 700, fill: "#14532D" }, mes));
+    const ang = ((i * 30 + 15) * Math.PI) / 180;
+    rueda.append(svg("text", { x: (170 + 157 * Math.sin(ang)).toFixed(1), y: (174 - 157 * Math.cos(ang)).toFixed(1), "text-anchor": "middle", "font-size": 11, "font-weight": 700, fill: "#14532D" }, t(mes)));
   });
   rueda.append(svg("text", { x: 170, y: 166, "text-anchor": "middle", "font-size": 16, "font-weight": 800, fill: "#14532D" }, paso.nombre));
-  rueda.append(svg("text", { x: 170, y: 186, "text-anchor": "middle", "font-size": 12, fill: "#1F2937" }, `campaña ${paso.campania}`));
-  const leer = (l, nd) => MESES.map((m, i) => `${m} ${l[i] === "nodata" ? nd : NOMBRE[l[i]]}`).join(", ");
-  rueda.setAttribute("aria-label", `Rueda del año de ${paso.nombre}, campaña ${paso.campania}. Suelo con cultivo: ${leer(fuera, "")}. Agua y heladas: ${leer(dentro, "sin cultivo")}.`);
+  rueda.append(svg("text", { x: 170, y: 186, "text-anchor": "middle", "font-size": 12, fill: "#1F2937" }, t("campaña {n}", { n: paso.campania })));
+  const leer = (l, nd) => MESES.map((m, i) => `${t(m)} ${l[i] === "nodata" ? nd : NOMBRE[l[i]]}`).join(", ");
+  rueda.setAttribute("aria-label", t("Rueda del año de {cultivo}, campaña {n}. Suelo con cultivo: {fuera}. Agua y heladas: {dentro}.",
+    { cultivo: paso.nombre, n: paso.campania, fuera: leer(fuera, ""), dentro: leer(dentro, t("sin cultivo")) }));
 
   $("viendo").textContent = `${opcion().etiqueta}: ${opcion().titulo}`;
   $("campanias").replaceChildren(...vista().plan.map((p, i) => {
     const b = h("button", { type: "button", class: `chip${i === campania ? " is-selected" : ""}`, "aria-pressed": String(i === campania), "data-campania": i, icono: i === campania ? trazo(ICONO.ok, 16) : "" });
-    b.append(`Campaña ${p.campania}: ${p.nombre}`);
+    b.append(t("Campaña {n}: {cultivo}", { n: p.campania, cultivo: p.nombre }));
     return b;
   }));
   $("plan").replaceChildren(...vista().plan.map((p) => h("tr", {},
-    h("th", { scope: "row" }, String(p.campania)), h("td", {}, p.nombre), h("td", {}, p.siembra), h("td", {}, p.cosecha),
+    h("th", { scope: "row" }, String(p.campania)), h("td", {}, p.nombre), h("td", {}, t(p.siembra)), h("td", {}, t(p.cosecha)),
     h("td", {}, `${num(p.lluvia_mm)} mm`), h("td", {}, `${num(p.necesita_mm)} mm`),
     h("td", {}, pastilla(p.agua)), h("td", {}, pastilla(p.heladas)))));
 }
 
 function dibujarPorque() {
   const o = opcion();
-  $("porque-titulo").textContent = o.id === "rec" ? "¿Por qué esta opción?" : `Sobre «${o.titulo}»`;
+  $("porque-titulo").textContent = o.id === "rec" ? t("¿Por qué esta opción?") : t("Sobre «{titulo}»", { titulo: o.titulo });
   lista("porque", o.porque);
   lista("beneficios", o.beneficios);
   lista("riesgos", o.riesgos);
   lista("lagunas", datos.lagunas);
   const evidencia = [...datos.evidencia];
-  if (ndvi) evidencia.push(`${ndvi.fuente}: ${ndvi.periodo}, ${ndvi.observaciones} observaciones usadas y ${ndvi.descartadas_por_calidad} descartadas por nubes.`);
+  if (ndvi) evidencia.push(t("{fuente}: {periodo}, {usadas} observaciones usadas y {descartadas} descartadas por nubes.",
+    { fuente: ndvi.fuente, periodo: ndvi.periodo, usadas: ndvi.observaciones, descartadas: ndvi.descartadas_por_calidad }));
   lista("evidencia", evidencia);
   const c = datos.confianza;
-  $("conf-nivel").replaceChildren(pastilla("warn", c.nivel === "baja" ? "Baja" : "Media").lastChild);
+  $("conf-nivel").replaceChildren(pastilla("warn", c.nivel === "baja" ? t("Baja") : IDIOMA === "en" ? "Medium" : "Media").lastChild);
   $("conf-nivel").className = "st st-warn";
   [...$("conf-barras").children].forEach((b, i) => b.classList.toggle("on", i < c.barras));
-  $("conf-barras").setAttribute("aria-label", `Confianza ${c.nivel}, ${c.barras} de 3`);
+  $("conf-barras").setAttribute("aria-label", t("Confianza {nivel}, {barras} de 3", { nivel: t(c.nivel), barras: c.barras }));
   $("conf-motivo").textContent = c.motivo;
 }
 
@@ -157,16 +159,20 @@ function dibujarLluvia() {
   const ahora = rec.escenarios[escenario].estados.agua;
   let texto;
   if (escenario === "normal") {
-    texto = `Lluvia normal: ${num(normal.lluvia_anual_mm)} mm al año (${normal.descripcion.toLowerCase()}, ${datos.clima.periodo}).`;
+    texto = t("Lluvia normal: {mm} mm al año ({descripcion}, {periodo}).",
+      { mm: num(normal.lluvia_anual_mm), descripcion: normal.descripcion.toLowerCase(), periodo: datos.clima.periodo });
   } else {
-    const cambio = antes === ahora ? `En la opción recomendada, Agua se mantiene en ${NOMBRE[ahora]}.` : `En la opción recomendada, Agua pasa de ${NOMBRE[antes]} a ${NOMBRE[ahora]}.`;
-    texto = `${esc.descripcion} (${esc.campanias.join(", ")}): ${num(esc.lluvia_anual_mm)} mm al año frente a ${num(normal.lluvia_anual_mm)} de lo normal. ${cambio}`;
+    const cambio = antes === ahora
+      ? t("En la opción recomendada, Agua se mantiene en {ahora}.", { ahora: NOMBRE[ahora] })
+      : t("En la opción recomendada, Agua pasa de {antes} a {ahora}.", { antes: NOMBRE[antes], ahora: NOMBRE[ahora] });
+    texto = t("{descripcion} ({campanias}): {mm} mm al año frente a {normal} de lo normal. {cambio}",
+      { descripcion: esc.descripcion, campanias: esc.campanias.join(", "), mm: num(esc.lluvia_anual_mm), normal: num(normal.lluvia_anual_mm), cambio });
   }
   document.querySelector("#rain-note span").textContent = texto;
 }
 
 function fila(titulo, detalle, celdas) {
-  const th = h("th", { scope: "row" }, titulo, h("small", {}, detalle));
+  const th = h("th", { scope: "row" }, t(titulo), h("small", {}, t(detalle)));
   return h("tr", {}, th, ...celdas.map(([t, c]) => h("td", { class: c }, t)));
 }
 
@@ -181,7 +187,8 @@ function dibujarTabla() {
   ];
   if (ndvi) filas.push(fila("Verdor", "NDVI, de 0 a 1", ndvi.meses.map((m) => [num(m.ndvi, 2), "c-" + m.suelo])));
   $("tabla").replaceChildren(...filas);
-  $("tabla-nota").textContent = `Clima: ${datos.clima.fuente}, ${datos.clima.periodo}.` + (ndvi ? ` Verdor: ${ndvi.fuente}.` : "");
+  $("tabla-nota").textContent = t("Clima: {fuente}, {periodo}.", { fuente: datos.clima.fuente, periodo: datos.clima.periodo })
+    + (ndvi ? t(" Verdor: {fuente}.", { fuente: ndvi.fuente }) : "");
   lista("dice", [...datos.clima.hallazgos, ...(ndvi ? ndvi.hallazgos : [])]);
 }
 
@@ -193,7 +200,8 @@ function dibujar() {
   dibujarLluvia();
   dibujarTabla();
   const rec = datos.opciones[0];
-  const mensaje = `Chacra Futura: para ${entrada.lugar || "mi chacra"}, la opción recomendada es ${rec.titulo}. ${rec.resumen} Es un apoyo; hay que revisarlo con un técnico.`;
+  const mensaje = t("Chacra Futura: para {lugar}, la opción recomendada es {titulo}. {resumen} Es un apoyo; hay que revisarlo con un técnico.",
+    { lugar: entrada.lugar || t("mi chacra"), titulo: rec.titulo, resumen: rec.resumen });
   $("whatsapp").href = "https://wa.me/?text=" + encodeURIComponent(mensaje);
 }
 
@@ -207,9 +215,9 @@ async function cargar() {
   const este = ++pedido;
   const q = new URLSearchParams({ lat: entrada.lat, lon: entrada.lon, cultivo: entrada.cultivo, prioridades: entrada.prioridades || "", agua: entrada.agua || "poca", maquinaria: entrada.maquinaria || "ninguna", heladas: observacion === "hiela" ? "mas" : "normal" });
   try {
-    const r = await fetch("/api/opciones?" + q);
+    const r = await fetch(api("/api/opciones?" + q));
     const d = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(d.error || "No se pudo calcular.");
+    if (!r.ok) throw new Error(d.error || t("No se pudo calcular."));
     if (este !== pedido) return;
     datos = d;
     $("entrada").textContent = d.resumen_entrada;
@@ -218,21 +226,21 @@ async function cargar() {
     estado("");
     dibujar();
   } catch (e) {
-    if (este === pedido) estado(`${e.message} Vuelve a intentarlo o cambia tus respuestas.`);
+    if (este === pedido) estado(t("{error} Vuelve a intentarlo o cambia tus respuestas.", { error: e.message }));
   }
 }
 
 async function cargarVerdor() {
   const nota = $("ndvi-estado");
   try {
-    const r = await fetch(`/api/ndvi?lat=${entrada.lat}&lon=${entrada.lon}`);
+    const r = await fetch(api(`/api/ndvi?lat=${entrada.lat}&lon=${entrada.lon}`));
     const d = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(d.error);
     ndvi = d;
     nota.classList.add("is-hidden");
     if (datos) dibujar();
   } catch {
-    nota.querySelector("span").textContent = "El servicio de verdor de la NASA no respondió. Las opciones no dependen de él; puedes recargar la página para reintentar.";
+    nota.querySelector("span").textContent = t("El servicio de verdor de la NASA no respondió. Las opciones no dependen de él; puedes recargar la página para reintentar.");
   }
 }
 
@@ -270,8 +278,8 @@ $("observa").addEventListener("click", (e) => {
   observacion = b.dataset.obs;
   $("obs-nota").textContent = {
     igual: "",
-    hiela: "Tomamos tu observación: contamos más heladas en los meses fríos y recalculamos las opciones.",
-    seco: "Tomamos tu observación: te mostramos las opciones con el escenario de menos lluvia.",
+    hiela: t("Tomamos tu observación: contamos más heladas en los meses fríos y recalculamos las opciones."),
+    seco: t("Tomamos tu observación: te mostramos las opciones con el escenario de menos lluvia."),
   }[observacion];
   if (observacion === "seco") elegirEscenario("menos");
   else if (antes === "seco") elegirEscenario("normal");
@@ -283,9 +291,12 @@ entrada = leerEntrada();
 if (!entrada) {
   $("vacio").classList.remove("is-hidden");
   estado("");
-  $("titulo").textContent = "Tus opciones";
+  $("titulo").textContent = t("Tus opciones");
 } else {
-  $("titulo").textContent = `Tus 3 opciones para ${entrada.lugar || "tu chacra"}`;
+  $("titulo").textContent = t("Tus 3 opciones para {lugar}", { lugar: entrada.lugar || t("tu chacra") });
+  if (/^\d+$/.test(entrada.terreno || "")) {
+    document.querySelectorAll('a[href="mi-chacra.html?editar=1"]').forEach((a) => { a.href = "mi-chacra.html?terreno=" + entrada.terreno; });
+  }
   cargar();
   cargarVerdor();
 }
