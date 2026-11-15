@@ -46,7 +46,7 @@ No hay cuentas. El navegador genera un código al azar la primera vez y lo enví
 
 1. `app.py`: rutas de Flask.
 2. `nasa.py`: consultas a las dos APIs, caché y reglas de clasificación (Bien, Ojo, Evitar).
-3. `cultivos.py`: ficha de los 6 cultivos (agua, ciclo, heladas, familia).
+3. `cultivos.py`: ficha de los 6 cultivos (agua, ciclo, heladas, familia, rendimiento y rastrojo).
 4. `rotaciones.py`: compara las rotaciones y explica cada opción.
 5. `lugares.py`: nombres de lugares con OpenStreetMap.
 6. `terrenos.py`: terrenos guardados en SQLite.
@@ -59,3 +59,4 @@ No hay cuentas. El navegador genera un código al azar la primera vez y lo enví
 1. Los umbrales de `nasa.py` son reglas simples de la demo; falta que un técnico los valide.
 2. El clima viene de una cuadrícula de unos 50 km y el verdor de un píxel de 250 m.
 3. La ficha de cultivos usa valores generales de la FAO; falta ajustarla a cada zona.
+4. El rastrojo sale de la regresión del IPCC (2006, vol. 4, cuadro 11.2) con el rendimiento promedio de Bolivia (FAOSTAT, 2020-2024): no cambia con el lugar ni con el clima, y no descuenta lo que comen los animales o se quema.

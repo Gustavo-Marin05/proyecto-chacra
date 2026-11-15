@@ -5,7 +5,7 @@ explicables (no un modelo entrenado); los umbrales están en REGLAS y faltan val
 """
 from itertools import permutations
 
-from cultivos import CULTIVOS, familia, fuente, necesidad, nombre
+from cultivos import CULTIVOS, familia, fuente, fuente_residuo, necesidad, nombre, residuo_t_ha
 from idioma import decimal, tr
 from nasa import MESES, ORDEN, peor
 
@@ -19,7 +19,6 @@ REGLAS = {
     # Suelo: peso de cada componente y cortes del puntaje (0 a 1).
     "suelo_pesos": {"diversidad": 0.35, "nitrogeno": 0.30, "residuo": 0.20, "cobertura": 0.15},
     "suelo_bien": 0.6, "suelo_ojo": 0.35,
-    "residuo": {"alto": 1.0, "medio": 0.6, "bajo": 0.3},
     # Un mes con el suelo sin cultivo y esta lluvia o más se marca Evitar (riesgo de erosión).
     "lluvia_erosiva_mm": 60,
 }
@@ -28,6 +27,9 @@ PRIORIDADES = {
     "agua": "Ahorrar agua", "suelo": "Cuidar la tierra", "ingreso": "Ganar más",
     "erosion": "Menos erosión", "forraje": "Alimento para animales", "fuerza": "Devolver fuerza al suelo",
 }
+# El puntaje de rastrojo es relativo: 1 es el cultivo de la ficha que más deja.
+RESIDUO_MAXIMO = max(residuo_t_ha(c) for c in CULTIVOS)
+
 AGUA = {"poca": "Poca agua", "media": "Agua media", "buena": "Buena agua"}
 MAQUINARIA = {"ninguna": "sin maquinaria", "basica": "maquinaria básica", "completa": "maquinaria completa"}
 NOMBRE_ESTADO = {"ok": "Bien", "warn": "Ojo", "bad": "Evitar"}
@@ -109,6 +111,7 @@ def evaluar_cultivo(cultivo, siembra, lluvia, heladas, riego):
         "cobertura_agua": round(cobertura, 2), "dias_helada": round(dias, 1),
         "agua": _estado(cobertura, REGLAS["agua_bien"], REGLAS["agua_ojo"]),
         "heladas": _estado_helada(dias, ficha["helada"]),
+        "residuo_t_ha": round(residuo_t_ha(cultivo), 1),
         "rueda": {"fuera": fuera, "dentro": dentro},
     }
 
@@ -120,10 +123,11 @@ def evaluar_rotacion(cultivos, siembras, lluvia, heladas, riego):
 
     agua = sum(min(1, p["cobertura_agua"]) for p in plan) / n
     helada = sum(1 - min(1, p["dias_helada"] / REGLAS["helada"][f["helada"]][1]) for p, f in zip(plan, fichas)) / n
+    rastrojo = sum(residuo_t_ha(c) for c in cultivos) / n
     partes = {
         "diversidad": (len({f["familia"] for f in fichas}) - 1) / 2,
         "nitrogeno": 1.0 if any(f["leguminosa"] for f in fichas) else 0.0,
-        "residuo": sum(REGLAS["residuo"][f["residuo"]] for f in fichas) / n,
+        "residuo": rastrojo / RESIDUO_MAXIMO,
         "cobertura": min(1, sum(f["ciclo_meses"] for f in fichas) / n / 6),
     }
     suelo = sum(REGLAS["suelo_pesos"][k] * v for k, v in partes.items())
@@ -139,6 +143,7 @@ def evaluar_rotacion(cultivos, siembras, lluvia, heladas, riego):
             "heladas": max((p["heladas"] for p in plan), key=ORDEN.get),
         },
         "demanda_mm": round(demanda),
+        "residuo_t_ha": round(rastrojo, 1),
         "meses_cubiertos": round(sum(f["ciclo_meses"] for f in fichas) / n, 1),
     }
 
@@ -226,6 +231,11 @@ def _explicar(cultivos, normal, seco, hoy, clima, entrada):
     if forrajes and "forraje" in entrada["prioridades"]:
         beneficios.append(tr(f"Deja alimento para animales con {_juntar(forrajes)}.",
                              f"It leaves feed for animals with {_juntar(forrajes)}."))
+    beneficios.append(tr(
+        f"Deja unas {decimal(normal['residuo_t_ha'])} toneladas de rastrojo por hectárea en cada campaña, en promedio; "
+        "si se queda en la chacra, cubre el suelo.",
+        f"It leaves about {decimal(normal['residuo_t_ha'])} tonnes of crop residue per hectare each season, on average; "
+        "if it stays on the field, it covers the soil."))
     cubiertos = decimal(normal["meses_cubiertos"])
     beneficios.append(tr(f"El suelo queda con cultivo unos {cubiertos} meses al año en promedio.",
                          f"The soil stays under crop about {cubiertos} months a year on average."))
@@ -307,6 +317,10 @@ def comparar(clima, entrada):
            "Prices and the local market for each crop: that is why income is not calculated."),
         tr("La ficha de cultivos usa valores generales (FAO); falta ajustarla a tu zona y a tus variedades.",
            "The crop sheet uses general values (FAO); it still has to be adjusted to your area and varieties."),
+        tr("El rastrojo se calcula con el rendimiento promedio de Bolivia, no con el de tu chacra, "
+           "y no descuenta lo que se llevan los animales o se quema.",
+           "Crop residue is calculated with Bolivia's average yield, not your farm's, "
+           "and does not subtract what animals eat or what is burned."),
         tr("El clima viene de una cuadrícula de unos 50 km: en tu valle o ladera puede helar o llover distinto.",
            "The climate comes from a grid of about 50 km: in your valley or hillside frost and rain may differ."),
     ]
@@ -334,6 +348,7 @@ def comparar(clima, entrada):
             tr(f"{clima['fuente']}: lluvia y temperatura de {clima['periodo']}, para un punto a {clima['altitud_m']} m de altura.",
                f"{clima['fuente']}: rain and temperature from {clima['periodo']}, for a point at {clima['altitud_m']} m of altitude."),
             fuente(),
+            fuente_residuo(),
         ],
         "resumen_entrada": " · ".join(
             [tr(f"{nombre(actual)} hoy", f"{nombre(actual)} today")]
