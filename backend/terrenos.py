@@ -3,6 +3,7 @@
 No hay cuentas: cada navegador genera un código al azar y lo envía en cada pedido. Quien
 tiene el código ve y cambia sus terrenos; no se guarda nombre, teléfono ni correo.
 """
+import os
 import re
 import sqlite3
 from contextlib import closing
@@ -12,7 +13,7 @@ import rotaciones
 from cultivos import CULTIVOS
 from idioma import tr
 
-ARCHIVO = Path(__file__).parent / "datos" / "terrenos.db"
+ARCHIVO = Path(os.environ.get("CHACRA_DATOS", Path(__file__).parent / "datos")) / "terrenos.db"
 CODIGO = re.compile(r"[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}")
 MAXIMO = 20  # terrenos por código
 CAMPOS = ("nombre", "lat", "lon", "lugar", "cultivo", "prioridades", "agua", "maquinaria")
@@ -27,7 +28,7 @@ class TerrenoNoEncontrado(LookupError):
 
 
 def _conectar():
-    ARCHIVO.parent.mkdir(exist_ok=True)
+    ARCHIVO.parent.mkdir(parents=True, exist_ok=True)
     con = sqlite3.connect(ARCHIVO)
     con.row_factory = sqlite3.Row
     con.execute("""

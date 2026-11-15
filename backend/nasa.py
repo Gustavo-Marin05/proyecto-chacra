@@ -6,6 +6,7 @@ Reglas de la demo (umbrales simples y explicables, no validados por un técnico)
   - Suelo:   NDVI >= 0,40 Bien · 0,20 a 0,40 Ojo · < 0,20 Evitar (suelo casi desnudo)
 """
 import json
+import os
 import time
 import urllib.error
 import urllib.parse
@@ -16,7 +17,7 @@ from pathlib import Path
 
 from idioma import decimal, tr
 
-CACHE = Path(__file__).parent / "cache"
+CACHE = Path(os.environ.get("CHACRA_CACHE", Path(__file__).parent / "cache"))
 AGENTE = "demo-rotacion-cultivos/0.1"
 POWER_URL = "https://power.larc.nasa.gov/api/temporal/daily/point"
 MODIS_URL = "https://modis.ornl.gov/rst/api/v1/MOD13Q1"
@@ -61,7 +62,7 @@ def _con_cache(nombre, calcular):
     if archivo.exists():
         return json.loads(archivo.read_text(encoding="utf-8"))
     datos = calcular()
-    CACHE.mkdir(exist_ok=True)
+    CACHE.mkdir(parents=True, exist_ok=True)
     archivo.write_text(json.dumps(datos, ensure_ascii=False), encoding="utf-8")
     return datos
 
